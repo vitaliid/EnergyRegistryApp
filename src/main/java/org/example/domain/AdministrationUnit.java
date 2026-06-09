@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Getter
 @Setter
@@ -33,4 +36,7 @@ public class AdministrationUnit {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_unit_id")
     private AdministrationUnit parent;
+
+    @OneToMany(mappedBy = "unit", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AdministrationUnitAttribute> attributes = new ArrayList<>();
 }
