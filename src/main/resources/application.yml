@@ -22,6 +22,15 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        cache:
+          use_second_level_cache: true
+          use_query_cache: true
+          javax:
+            cache:
+              provider: org.ehcache.jsr107.EhcacheCachingProvider
+          cache:
+            region:
+              factory_class: jcache
     hibernate:
       ddl-auto: none
   liquibase:

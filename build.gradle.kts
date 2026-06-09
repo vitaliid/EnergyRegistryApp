@@ -31,6 +31,11 @@ dependencies {
 
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
 
+    //2nd level cache
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("org.hibernate.orm:hibernate-jcache")
+    implementation("org.ehcache:ehcache")
+
     //Lombok
     compileOnly("org.projectlombok:lombok:1.18.46")
     annotationProcessor("org.projectlombok:lombok:1.18.46")
