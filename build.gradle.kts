@@ -40,6 +40,10 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.46")
     annotationProcessor("org.projectlombok:lombok:1.18.46")
 
+    // MapStruct core and processor
+    implementation("org.mapstruct:mapstruct:1.6.3")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
+
     //DB
     implementation("org.liquibase:liquibase-core")
     runtimeOnly("org.postgresql:postgresql")
