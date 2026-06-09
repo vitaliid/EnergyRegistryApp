@@ -14,19 +14,7 @@ dependencies {
     implementation(platform("de.bund.bva.isyfact:isyfact-products-bom:5.0.2"))
     implementation(platform("de.bund.bva.isyfact:isyfact-standards-bom:5.0.2"))
 
-    // Core Spring Boot starters managed by the IsyFact Products BOM
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-
-    compileOnly("org.projectlombok:lombok:1.18.46")
-    annotationProcessor("org.projectlombok:lombok:1.18.46")
-
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
-
-    runtimeOnly("org.postgresql:postgresql")
-
     //IsyFact LIBS-----------------------------------------------------
-
     // Logging infrastructure aligned with German Federal standard formatting
     implementation("de.bund.bva.isyfact:isy-logging")
 
@@ -36,6 +24,20 @@ dependencies {
     // Health-check and monitoring endpoints
     //implementation("de.bund.bva.isyfact:isy-ueberwachung")
     //-----------------------------------------------------
+
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-liquibase")
+
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
+
+    //Lombok
+    compileOnly("org.projectlombok:lombok:1.18.46")
+    annotationProcessor("org.projectlombok:lombok:1.18.46")
+
+    //DB
+    implementation("org.liquibase:liquibase-core")
+    runtimeOnly("org.postgresql:postgresql")
 
     // Testing suite
     testImplementation("org.springframework.boot:spring-boot-starter-test")

@@ -4,7 +4,7 @@ logging:
     de.bund.bva.isyfact: INFO
     org.example: INFO
 
-# it was required for isyfact logging lib
+# it was required for IsyFact logging lib
 isy:
   logging:
     anwendung:
@@ -22,6 +22,11 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/master.yaml
 
 springdoc:
   api-docs:
