@@ -21,6 +21,8 @@ spring:
     show-sql: true
     properties:
       hibernate:
+        envers:
+          autoRegisterListeners: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
         cache:
           use_second_level_cache: true

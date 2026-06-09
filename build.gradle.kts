@@ -36,6 +36,8 @@ dependencies {
     implementation("org.hibernate.orm:hibernate-jcache")
     implementation("org.ehcache:ehcache")
 
+    implementation("org.hibernate.orm:hibernate-envers")
+
     //Lombok
     compileOnly("org.projectlombok:lombok:1.18.46")
     annotationProcessor("org.projectlombok:lombok:1.18.46")

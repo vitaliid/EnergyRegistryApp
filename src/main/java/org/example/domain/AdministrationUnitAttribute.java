@@ -3,11 +3,13 @@ package org.example.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.Audited;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "administration_unit_attribute")
+@Audited
 public class AdministrationUnitAttribute {
 
     @Id
@@ -21,6 +23,6 @@ public class AdministrationUnitAttribute {
     @Column(name = "attr_key", nullable = false, length = 100)
     private String key;
 
-    @Column(name = "attr_value", nullable = false, length = 255)
+    @Column(name = "attr_value", nullable = false)
     private String value;
 }

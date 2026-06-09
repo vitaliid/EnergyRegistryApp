@@ -25,9 +25,9 @@ public class AdministrationUnitAttributeController {
     // CREATE attribute
     @PostMapping("/{unitId}/attributes")
     public AdministrationUnitAttribute createAttribute(
-            @PathVariable Integer unitId,
-            @RequestParam String key,
-            @RequestParam String value) {
+            @PathVariable("unitId") Integer unitId,
+            @RequestParam("key") String key,
+            @RequestParam("value") String value) {
 
         return service.create(unitId, key, value);
     }
