@@ -4,12 +4,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.example.domain.AdministrationUnitType;
+import org.example.dto.AdministrationUnitRequest;
 import org.example.dto.AdministrationUnitResponse;
 import org.example.service.AdministrationUnitService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -30,5 +28,12 @@ public class AdministrationUnitController {
             AdministrationUnitType type) {
 
         return service.getByType(type);
+    }
+
+    @PostMapping
+    public AdministrationUnitResponse create(
+            @RequestBody AdministrationUnitRequest request) {
+
+        return service.create(request);
     }
 }

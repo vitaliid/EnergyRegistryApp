@@ -1,7 +1,10 @@
 package org.example.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.example.domain.AdministrationUnit;
 import org.example.domain.AdministrationUnitType;
+import org.example.dto.AdministrationUnitRequest;
 import org.example.dto.AdministrationUnitResponse;
 import org.example.mappers.AdministrationUnitMapper;
 import org.example.repository.AdministrationUnitRepository;
@@ -23,4 +26,21 @@ public class AdministrationUnitService {
                 .toList();
     }
 
+    @Transactional
+    public AdministrationUnitResponse create(AdministrationUnitRequest request) {
+
+        AdministrationUnit entity = mapper.toEntity(request);
+
+        // handle parent relation
+        if (request.getParentId() != null) {
+            AdministrationUnit parent = administrationUnitRepository.findById(request.getParentId())
+                    .orElseThrow(() -> new RuntimeException("Parent not found"));
+
+            entity.setParent(parent);
+        }
+
+        AdministrationUnit saved = administrationUnitRepository.save(entity);
+
+        return mapper.toResponse(saved);
+    }
 }
