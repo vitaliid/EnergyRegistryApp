@@ -1,0 +1,30 @@
+logging:
+  level:
+    root: INFO
+    de.bund.bva.isyfact: INFO
+    org.example: INFO
+
+# it was required for isyfact logging lib
+isy:
+  logging:
+    anwendung:
+      name: DenaApp
+      typ: backend
+      version: 1.0.0
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/dena
+    username: postgres
+    password: password
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui
