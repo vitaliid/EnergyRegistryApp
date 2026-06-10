@@ -1,8 +1,13 @@
 package org.example.service;
 
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.domain.AdministrationUnit;
 import org.example.domain.AdministrationUnitAttribute;
+import org.example.dto.AdministrationUnitAttributeRequest;
+import org.example.dto.AdministrationUnitAttributeResponse;
+import org.example.mappers.AdministrationUnitAttributeMapper;
 import org.example.repository.AdministrationUnitAttributeRepository;
 import org.example.repository.AdministrationUnitRepository;
 import org.springframework.stereotype.Service;
@@ -15,22 +20,29 @@ public class AdministrationUnitAttributeService {
 
     private final AdministrationUnitAttributeRepository repository;
     private final AdministrationUnitRepository unitRepository;
+    private final AdministrationUnitAttributeMapper mapper;
 
-    public List<AdministrationUnitAttribute> getByUnitId(Long unitId) {
-        return repository.findByUnitId(unitId);
+    public List<AdministrationUnitAttributeResponse> getByUnitId(Long unitId) {
+        return repository.findByUnitId(unitId).stream()
+                .map(mapper::toResponse)
+                .toList();
     }
 
-    public AdministrationUnitAttribute create(Integer unitId, String key, String value) {
+    @Transactional
+    public AdministrationUnitAttributeResponse create(Integer unitId,
+                                                      AdministrationUnitAttributeRequest request) {
 
-        AdministrationUnit unit = unitRepository.findById(unitId)
-                .orElseThrow(() -> new RuntimeException("Unit not found"));
+        AdministrationUnit unit = unitRepository
+                .findById(unitId)
+                .orElseThrow(() -> new EntityNotFoundException("AdministrationUnit not found"));
 
-        AdministrationUnitAttribute attr = new AdministrationUnitAttribute();
-        attr.setUnit(unit);
-        attr.setKey(key);
-        attr.setValue(value);
+        AdministrationUnitAttribute attribute = mapper.toEntity(request);
 
-        return repository.save(attr);
+        attribute.setUnit(unit);
+
+        return mapper.toResponse(
+                repository.save(attribute)
+        );
     }
 
     public void delete(Long id) {

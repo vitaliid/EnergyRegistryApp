@@ -1,7 +1,8 @@
 package org.example.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.domain.AdministrationUnitAttribute;
+import org.example.dto.AdministrationUnitAttributeRequest;
+import org.example.dto.AdministrationUnitAttributeResponse;
 import org.example.service.AdministrationUnitAttributeService;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,25 +15,22 @@ public class AdministrationUnitAttributeController {
 
     private final AdministrationUnitAttributeService service;
 
-    // GET attributes for unit
     @GetMapping("/{unitId}/attributes")
-    public List<AdministrationUnitAttribute> getAttributes(
+    public List<AdministrationUnitAttributeResponse> getAttributes(
             @PathVariable Long unitId) {
 
         return service.getByUnitId(unitId);
     }
 
-    // CREATE attribute
     @PostMapping("/{unitId}/attributes")
-    public AdministrationUnitAttribute createAttribute(
+    public AdministrationUnitAttributeResponse createAttribute(
             @PathVariable("unitId") Integer unitId,
-            @RequestParam("key") String key,
-            @RequestParam("value") String value) {
+            @RequestBody
+            AdministrationUnitAttributeRequest request) {
 
-        return service.create(unitId, key, value);
+        return service.create(unitId, request);
     }
 
-    // DELETE attribute
     @DeleteMapping("/attributes/{id}")
     public void delete(@PathVariable Long id) {
         service.delete(id);
