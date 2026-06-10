@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.domain.AdministrationUnitType;
 import org.example.dto.AdministrationUnitRequest;
 import org.example.dto.AdministrationUnitResponse;
+import org.example.dto.AdministrationUnitUpdateRequest;
 import org.example.service.AdministrationUnitService;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,5 +36,13 @@ public class AdministrationUnitController {
             @RequestBody AdministrationUnitRequest request) {
 
         return service.create(request);
+    }
+
+    @PutMapping("/{id}")
+    public AdministrationUnitResponse updateUnit(
+            @PathVariable("id") Integer id,
+            @RequestBody AdministrationUnitUpdateRequest request) {
+
+        return service.update(id, request);
     }
 }
