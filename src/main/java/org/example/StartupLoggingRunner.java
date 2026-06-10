@@ -1,16 +1,21 @@
 package org.example;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import de.bund.bva.isyfact.logging.IsyLogger;
+import de.bund.bva.isyfact.logging.IsyLoggerFactory;
+import de.bund.bva.isyfact.logging.LogKategorie;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
 
-@Slf4j
+
 @Component
 @RequiredArgsConstructor
 public class StartupLoggingRunner implements ApplicationRunner {
+
+    private static final IsyLogger log =
+            IsyLoggerFactory.getLogger(StartupLoggingRunner.class);
 
     private final Environment environment;
 
@@ -22,11 +27,11 @@ public class StartupLoggingRunner implements ApplicationRunner {
 
         String host = "http://localhost:" + port + contextPath;
 
-        log.info("========================================");
-        log.info("🚀 Application started successfully");
-        log.info("🌍 Application URL: {}", host);
-        log.info("📄 Swagger UI: {}/swagger-ui/index.html", host);
-        log.info("📄 OpenAPI Docs: {}/v3/api-docs", host);
-        log.info("========================================");
+        log.info(LogKategorie.JOURNAL, "EAPP00001", "========================================");
+        log.info(LogKategorie.JOURNAL, "EAPP00001", "🚀 Application started successfully");
+        log.info(LogKategorie.JOURNAL, "EAPP00001", "🌍 Application URL: {}", host);
+        log.info(LogKategorie.JOURNAL, "EAPP00001", "📄 Swagger UI: {}/swagger-ui/index.html", host);
+        log.info(LogKategorie.JOURNAL, "EAPP00001", "📄 OpenAPI Docs: {}/v3/api-docs", host);
+        log.info(LogKategorie.JOURNAL, "EAPP00001", "========================================");
     }
 }
