@@ -1,4 +1,4 @@
-package org.example;
+package org.example.components;
 
 import de.bund.bva.isyfact.logging.IsyLogger;
 import de.bund.bva.isyfact.logging.IsyLoggerFactory;

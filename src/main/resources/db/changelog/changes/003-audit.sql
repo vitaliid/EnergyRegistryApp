@@ -4,7 +4,11 @@
 
 CREATE TABLE revinfo (
                          id SERIAL PRIMARY KEY,
-                         timestamp BIGINT NOT NULL
+                         timestamp BIGINT NOT NULL,
+                         username VARCHAR(100),
+                         application VARCHAR(100),
+                         remote_address VARCHAR(100),
+                         request_id VARCHAR(100)
 );
 
 CREATE INDEX idx_revinfo_timestamp

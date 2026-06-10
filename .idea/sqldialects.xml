@@ -4,5 +4,6 @@
     <file url="file://$PROJECT_DIR$/src/main/resources/db/changelog/changes/001-create-administration-unit.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/src/main/resources/db/changelog/changes/002-create-administration_unit_attribute.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/src/main/resources/db/changelog/changes/003-audit.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/db/changelog/changes/004-audit_mod.sql" dialect="PostgreSQL" />
   </component>
 </project>

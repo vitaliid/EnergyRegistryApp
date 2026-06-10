@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset admin:001-create-administration-unit-attribute
+--changeset vitalii:002-create-administration-unit-attribute
 
 CREATE TABLE administration_unit_attribute
 (

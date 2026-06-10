@@ -20,6 +20,7 @@ spring:
   jpa:
     show-sql: true
     properties:
+      org.hibernate.envers.global_with_modified_flag: true
       hibernate:
         envers:
           autoRegisterListeners: true
