@@ -17,7 +17,7 @@ import java.util.List;
 @Table(name = "administration_unit")
 @Cacheable
 @Audited
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "administrationUnitCache")
 public class AdministrationUnit {
 
     @Id
