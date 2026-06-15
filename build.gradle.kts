@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("org.openapi.generator") version "7.23.0"
 }
 
 group = "org.example"
@@ -52,6 +53,31 @@ dependencies {
 
     // Testing suite
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+}
+
+openApiGenerate {
+    generatorName.set("java")
+    inputSpec.set("$rootDir/src/main/resources/openapiexample.yaml")
+    outputDir.set(layout.buildDirectory.dir("generated/openapi").get().asFile.path)
+
+//    apiPackage.set("org.example.client.api")
+//    modelPackage.set("org.example.client.model")
+//    invokerPackage.set("org.example.client")
+
+    configOptions.set(
+        mapOf(
+            "library" to "native",
+            "dateLibrary" to "java8"
+        )
+    )
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir(layout.buildDirectory.dir("generated/openapi/src/main/java"))
+        }
+    }
 }
 
 tasks.test {

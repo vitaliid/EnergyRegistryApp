@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-public class HelloController {
+public class TestController {
 
     private final CacheTestService cacheTestService;
     private final EntityManagerFactory emf;
