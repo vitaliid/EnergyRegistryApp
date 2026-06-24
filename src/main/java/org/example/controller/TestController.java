@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.service.CacheTestService;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,5 +45,16 @@ public class TestController {
                         stats.getSecondLevelCacheHitCount(),
                         stats.getSecondLevelCacheMissCount(),
                         stats.getSecondLevelCachePutCount());
+    }
+
+    @GetMapping("/public/hello")
+    public String publicHello() {
+        return "Public endpoint";
+    }
+
+    @PreAuthorize("hasRole('user')")
+    @GetMapping("/user/hello")
+    public String userHello() {
+        return "Hello, authenticated user with ROLE_user!";
     }
 }
