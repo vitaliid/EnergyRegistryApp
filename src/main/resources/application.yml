@@ -16,6 +16,12 @@ isy:
       typ: backend
       version: 1.0.0
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/dena

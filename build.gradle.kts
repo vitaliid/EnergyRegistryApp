@@ -25,7 +25,7 @@ dependencies {
     // Health-check and monitoring endpoints
     //implementation("de.bund.bva.isyfact:isy-ueberwachung")
     //-----------------------------------------------------
-
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-liquibase")

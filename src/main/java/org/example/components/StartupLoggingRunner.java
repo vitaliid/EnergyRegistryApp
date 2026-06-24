@@ -30,8 +30,9 @@ public class StartupLoggingRunner implements ApplicationRunner {
         log.info(LogKategorie.JOURNAL, "EAPP00001", "========================================");
         log.info(LogKategorie.JOURNAL, "EAPP00001", "🚀 Application started successfully");
         log.info(LogKategorie.JOURNAL, "EAPP00001", "🌍 Application URL: {}", host);
+        log.info(LogKategorie.JOURNAL, "EAPP00001", "📄 Health check: {}/actuator/health", host);
         log.info(LogKategorie.JOURNAL, "EAPP00001", "📄 Swagger UI: {}/swagger-ui/index.html", host);
-        log.info(LogKategorie.JOURNAL, "EAPP00001", "📄 OpenAPI Docs: {}/v3/api-docs", host);
+        log.info(LogKategorie.JOURNAL, "EAPP00001", "📄 OpenAPI Docs: {}/api-docs", host);
         log.info(LogKategorie.JOURNAL, "EAPP00001", "========================================");
     }
 }
