@@ -7,9 +7,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.service.CacheTestService;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
+import org.springframework.context.MessageSource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Locale;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -18,6 +23,7 @@ public class TestController {
 
     private final CacheTestService cacheTestService;
     private final EntityManagerFactory emf;
+    private final MessageSource messageSource;
 
     @Operation(summary = "Health check")
     @GetMapping("/hello")
@@ -50,6 +56,18 @@ public class TestController {
     @GetMapping("/public/hello")
     public String publicHello() {
         return "Public endpoint";
+    }
+
+    @GetMapping("/public/greeting")
+    public Map<String, String> greeting(
+            @RequestParam(defaultValue = "friend", name = "name") String name,
+            Locale locale
+    ) {
+        String message = messageSource.getMessage("greeting", new Object[]{name}, locale);
+        return Map.of(
+                "locale", locale.toLanguageTag(),
+                "message", message
+        );
     }
 
     @PreAuthorize("hasRole('user')")
