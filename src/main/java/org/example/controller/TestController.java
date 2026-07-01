@@ -60,7 +60,10 @@ public class TestController {
 
     @GetMapping("/public/greeting")
     public Map<String, String> greeting(
-            @RequestParam(defaultValue = "friend", name = "name") String name,
+            @RequestParam(
+                    defaultValue = "friend",
+                    name = "name"
+            ) String name,
             Locale locale
     ) {
         String message = messageSource.getMessage("greeting", new Object[]{name}, locale);
