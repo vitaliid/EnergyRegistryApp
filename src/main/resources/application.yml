@@ -73,3 +73,7 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui
+
+
+energy:
+  threshold: 1000

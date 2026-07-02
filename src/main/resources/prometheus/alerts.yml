@@ -1,0 +1,20 @@
+groups:
+  - name: energy-alerts
+    rules:
+      - alert: EnergyReadingTooHigh
+        expr: energy_meter_value > on() group_left energy_threshold
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Energy reading is too high"
+          description: "Meter {{ $labels.meter_id }} has value {{ $value }}, above configured threshold."
+
+      - alert: EnergyReadingAboveFixedThreshold
+        expr: energy_meter_value > 1000
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Energy reading is above 1000"
+          description: "Meter {{ $labels.meter_id }} has value {{ $value }}."

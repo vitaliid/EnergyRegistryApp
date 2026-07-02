@@ -58,9 +58,25 @@ services:
     networks:
       - keycloak-network
 
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: dena-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./src/main/resources/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./src/main/resources/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+
 volumes:
   postgres_dena_data:
   postgres_keycloak_data:
+  prometheus-data:
 
 networks:
   keycloak-network:
