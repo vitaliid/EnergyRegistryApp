@@ -1,5 +1,6 @@
 package org.example.controller;
 
+import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +54,7 @@ public class TestController {
                         stats.getSecondLevelCachePutCount());
     }
 
+    @Timed(value = "public_hello_time", description = "Time spent handling pubic/hello endpoint")
     @GetMapping("/public/hello")
     public String publicHello() {
         return "Public endpoint";
