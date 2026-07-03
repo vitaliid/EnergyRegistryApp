@@ -1,0 +1,18 @@
+global:
+  smtp_smarthost: smtp.gmail.com:587
+  smtp_from: vitalik.dudok@gmail.com
+  smtp_auth_username: vitalik.dudok@gmail.com
+  smtp_auth_password: App password
+  smtp_require_tls: true
+
+route:
+  receiver: email-alerts
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 1h
+
+receivers:
+  - name: email-alerts
+    email_configs:
+      - to: vitalii.dudok@eleks.com
+        send_resolved: true
