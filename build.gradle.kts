@@ -60,6 +60,8 @@ dependencies {
     implementation("org.liquibase:liquibase-core")
     runtimeOnly("org.postgresql:postgresql")
 
+    implementation("org.apache.commons:commons-csv:1.14.1")
+
     // Testing suite
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
