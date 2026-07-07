@@ -2,7 +2,7 @@ global:
   smtp_smarthost: smtp.gmail.com:587
   smtp_from: vitalik.dudok@gmail.com
   smtp_auth_username: vitalik.dudok@gmail.com
-  smtp_auth_password: App password
+  smtp_auth_password: dhxi ymon zbaq mgwx
   smtp_require_tls: true
 
 route:

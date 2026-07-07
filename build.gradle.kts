@@ -60,6 +60,11 @@ dependencies {
     implementation("org.liquibase:liquibase-core")
     runtimeOnly("org.postgresql:postgresql")
 
+    //Search
+    implementation(platform("org.hibernate.search:hibernate-search-bom:8.2.2.Final"))
+    implementation("org.hibernate.search:hibernate-search-mapper-orm")
+    implementation("org.hibernate.search:hibernate-search-backend-lucene")
+
     implementation("org.apache.commons:commons-csv:1.14.1")
 
     // Testing suite

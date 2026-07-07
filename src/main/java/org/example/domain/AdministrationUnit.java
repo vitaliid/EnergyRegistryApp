@@ -6,11 +6,15 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
+@Indexed
 @Getter
 @Setter
 @Entity
@@ -26,13 +30,16 @@ public class AdministrationUnit {
             name = "administration_unit_seq",
             sequenceName = "administration_unit_seq"
     )
+    @GenericField
     private int id;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
+    @GenericField
     private AdministrationUnitType type;
 
     @Column(name = "name", nullable = false)
+    @FullTextField
     private String unitName;
 
     @ManyToOne(fetch = FetchType.LAZY)

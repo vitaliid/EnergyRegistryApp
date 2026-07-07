@@ -55,6 +55,13 @@ spring:
           cache:
             region:
               factory_class: jcache
+        search:
+          backend:
+            type: lucene
+            directory:
+              type: local-filesystem
+              root: ./build/hibernate-search-indexes
+
     hibernate:
       ddl-auto: none
   liquibase:
