@@ -34,65 +34,80 @@ public class AdministrationUnitService {
 
     @Transactional
     public AdministrationUnitResponse create(AdministrationUnitRequest request) {
+        try {
+            AdministrationUnit entity = mapper.toEntity(request);
+            if (request.getParentId() != null) {
+                AdministrationUnit parent = administrationUnitRepository.findById(request.getParentId())
+                        .orElseThrow(() -> new RuntimeException("Parent not found"));
+                entity.setParent(parent);
+            }
+            AdministrationUnit saved = administrationUnitRepository.save(entity);
+            userActionPublisher.success(
+                    UserActionType.ADMINISTRATION_UNIT_CREATED,
+                    "ADMINISTRATION_UNIT",
+                    saved.getId(),
+                    Map.of("type", saved.getType().name())
+            );
+            return mapper.toResponse(saved);
+        } catch (Exception ex) {
+            userActionPublisher.failure(
+                    UserActionType.ADMINISTRATION_UNIT_CREATED,
+                    "ADMINISTRATION_UNIT",
+                    null,
+                    "UPDATE_FAILED"
+            );
 
-        AdministrationUnit entity = mapper.toEntity(request);
-
-        if (request.getParentId() != null) {
-            AdministrationUnit parent = administrationUnitRepository.findById(request.getParentId())
-                    .orElseThrow(() -> new RuntimeException("Parent not found"));
-
-            entity.setParent(parent);
+            throw ex;
         }
-
-        AdministrationUnit saved = administrationUnitRepository.save(entity);
-
-        userActionPublisher.success(
-                UserActionType.ADMINISTRATION_UNIT_CREATED,
-                "ADMINISTRATION_UNIT",
-                saved.getId(),
-                Map.of("type", saved.getType().name())
-        );
-
-        return mapper.toResponse(saved);
     }
 
     @Transactional
     public AdministrationUnitResponse update(Integer id,
                                              AdministrationUnitUpdateRequest request) {
-
-        AdministrationUnit unit = administrationUnitRepository.findById(id)
-                .orElseThrow(() ->
-                        new EntityNotFoundException(
-                                "AdministrationUnit not found: " + id));
-
-        if (request.getType() != null) {
-            unit.setType(request.getType());
-        }
-
-        if (request.getUnitName() != null) {
-            unit.setUnitName(request.getUnitName());
-        }
-
-        if (request.getParentId() != null) {
-            AdministrationUnit parent = administrationUnitRepository.findById(request.getParentId())
+        try {
+            AdministrationUnit unit = administrationUnitRepository.findById(id)
                     .orElseThrow(() ->
                             new EntityNotFoundException(
-                                    "Parent not found: " + request.getParentId()));
+                                    "AdministrationUnit not found: " + id));
 
-            unit.setParent(parent);
-        } else {
-            unit.setParent(null);
+            if (request.getType() != null) {
+                unit.setType(request.getType());
+            }
+
+            if (request.getUnitName() != null) {
+                unit.setUnitName(request.getUnitName());
+            }
+
+            if (request.getParentId() != null) {
+                AdministrationUnit parent = administrationUnitRepository.findById(request.getParentId())
+                        .orElseThrow(() ->
+                                new EntityNotFoundException(
+                                        "Parent not found: " + request.getParentId()));
+
+                unit.setParent(parent);
+            } else {
+                unit.setParent(null);
+            }
+
+            AdministrationUnit saved = administrationUnitRepository.save(unit);
+
+            userActionPublisher.success(
+                    UserActionType.ADMINISTRATION_UNIT_UPDATED,
+                    "ADMINISTRATION_UNIT",
+                    saved.getId(),
+                    Map.of()
+            );
+
+            return mapper.toResponse(saved);
+        } catch (RuntimeException ex) {
+            userActionPublisher.failure(
+                    UserActionType.ADMINISTRATION_UNIT_UPDATED,
+                    "ADMINISTRATION_UNIT",
+                    id,
+                    "UPDATE_FAILED"
+            );
+
+            throw ex;
         }
-
-        AdministrationUnit saved = administrationUnitRepository.save(unit);
-
-        userActionPublisher.success(
-                UserActionType.ADMINISTRATION_UNIT_UPDATED,
-                "ADMINISTRATION_UNIT",
-                saved.getId(),
-                Map.of()
-        );
-
-        return mapper.toResponse(saved);
     }
 }
