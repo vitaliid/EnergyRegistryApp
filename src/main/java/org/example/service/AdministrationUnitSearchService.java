@@ -21,10 +21,10 @@ public class AdministrationUnitSearchService {
         var searchSession = Search.session(entityManager);
 
         return searchSession.search(AdministrationUnit.class)
-                .where(f -> f.match()
-                        .field("unitName")
-                        .matching(query)
-                        .fuzzy(1)
+                .where(f -> f.wildcard()
+                                .field("unitName")
+                                .matching("*" + query.toLowerCase() + "*")
+                        //.fuzzy(1)
                 )
                 .fetchHits(limit)
                 .stream()
