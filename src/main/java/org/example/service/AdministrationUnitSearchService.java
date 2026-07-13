@@ -16,7 +16,7 @@ public class AdministrationUnitSearchService {
 
     private final EntityManager entityManager;
 
-    @Transactional(readOnly = true)
+    @Transactional(transactionManager = "transactionManager", readOnly = true)
     public List<AdministrationUnitSearchDto> search(String query, int limit) {
         var searchSession = Search.session(entityManager);
 

@@ -67,6 +67,8 @@ dependencies {
 
     implementation("org.apache.commons:commons-csv:1.14.1")
 
+    implementation("org.springframework.boot:spring-boot-starter-kafka")
+
     // Testing suite
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

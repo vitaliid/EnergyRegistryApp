@@ -1,7 +1,7 @@
 package org.example.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.components.UserActionPublisher;
 import org.example.domain.AdministrationUnit;
@@ -32,7 +32,7 @@ public class AdministrationUnitService {
                 .toList();
     }
 
-    @Transactional
+    @Transactional(transactionManager = "transactionManager")
     public AdministrationUnitResponse create(AdministrationUnitRequest request) {
         try {
             AdministrationUnit entity = mapper.toEntity(request);
@@ -61,7 +61,7 @@ public class AdministrationUnitService {
         }
     }
 
-    @Transactional
+    @Transactional(transactionManager = "transactionManager")
     public AdministrationUnitResponse update(Integer id,
                                              AdministrationUnitUpdateRequest request) {
         try {

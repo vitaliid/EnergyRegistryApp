@@ -61,7 +61,6 @@ spring:
             directory:
               type: local-filesystem
               root: ./build/hibernate-search-indexes
-
     hibernate:
       ddl-auto: none
   liquibase:
@@ -78,7 +77,24 @@ spring:
       enabled: true
       max-file-size: 10MB
       max-request-size: 50MB
-
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      transaction-id-prefix: dena-user-action-${HOSTNAME:local}-
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: dena-user-action-log-writer
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: org.example
+        spring.json.value.default.type: org.example.domain.logging.UserActionEvent
+    listener:
+      ack-mode: record
 
 springdoc:
   api-docs:
@@ -86,6 +102,9 @@ springdoc:
   swagger-ui:
     path: /swagger-ui
 
-
-energy:
-  threshold: 1000
+app:
+  kafka:
+    topics:
+      user-actions: dena.user-actions.v1
+  energy:
+    threshold: 1000
