@@ -1,5 +1,7 @@
 package org.example.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.example.dto.EnergyReadingRequest;
@@ -14,14 +16,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class EnergyCsvUploadService {
 
     private final EnergyRegistryService energyRegistryService;
-
-    public EnergyCsvUploadService(EnergyRegistryService energyRegistryService) {
-        this.energyRegistryService = energyRegistryService;
-    }
+    private final ObjectStorageService objectStorageService;
 
     public EnergyUploadResponse processFiles(List<MultipartFile> files) {
         validateFiles(files);
@@ -31,6 +32,11 @@ public class EnergyCsvUploadService {
         for (MultipartFile file : files) {
             validateCsv(file);
             registered.addAll(processFile(file));
+
+            ObjectStorageService.StoredObject storedFile =
+                    objectStorageService.upload(file);
+
+            log.info("File saved in storage: {}", storedFile.objectKey());
         }
 
         return new EnergyUploadResponse(

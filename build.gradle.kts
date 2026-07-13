@@ -69,6 +69,8 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-kafka")
 
+    implementation("io.minio:minio:8.6.0")
+
     // Testing suite
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
