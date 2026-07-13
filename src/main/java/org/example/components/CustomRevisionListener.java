@@ -13,7 +13,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 public class CustomRevisionListener implements RevisionListener {
 
-    private static final String APPLICATION = "dena-app";
+    private static final String APPLICATION = "energyregistry-app";
     private static final String SYSTEM = "SYSTEM";
 
     @Override

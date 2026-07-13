@@ -12,7 +12,7 @@ logging:
 isy:
   logging:
     anwendung:
-      name: DenaApp
+      name: EnergyRegistryApp
       typ: backend
       version: 1.0.0
 
@@ -26,7 +26,7 @@ management:
       show-details: always
   metrics:
     tags:
-      application: dena-app
+      application: energyregistry-app
   prometheus:
     metrics:
       export:
@@ -34,7 +34,7 @@ management:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/dena
+    url: jdbc:postgresql://localhost:5432/energyregistry
     username: postgres
     password: password
   jpa:
@@ -70,8 +70,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:9090/realms/dena-realm
-          jwk-set-uri: http://localhost:9090/realms/dena-realm/protocol/openid-connect/certs
+          issuer-uri: http://localhost:9090/realms/energyregistry-realm
+          jwk-set-uri: http://localhost:9090/realms/energyregistry-realm/protocol/openid-connect/certs
   servlet:
     multipart:
       enabled: true
@@ -82,11 +82,11 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      transaction-id-prefix: dena-user-action-${HOSTNAME:local}-
+      transaction-id-prefix: energyregistry-user-action-${HOSTNAME:local}-
       properties:
         spring.json.add.type.headers: false
     consumer:
-      group-id: dena-user-action-log-writer
+      group-id: energyregistry-user-action-log-writer
       enable-auto-commit: false
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
@@ -105,11 +105,11 @@ springdoc:
 app:
   kafka:
     topics:
-      user-actions: dena.user-actions.v1
+      user-actions: energyregistry.user-actions.v1
   energy:
     threshold: 1000
   minio:
     endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
     access-key: ${MINIO_ACCESS_KEY:minioadmin}
     secret-key: ${MINIO_SECRET_KEY:minioadmin}
-    bucket: dena-energy-uploads
+    bucket: energyregistry-energy-uploads

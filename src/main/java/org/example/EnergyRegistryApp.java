@@ -8,8 +8,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 
 @SpringBootApplication
 @EnableConfigurationProperties(EnergyProperties.class)
-public class DenaApp {
+public class EnergyRegistryApp {
     static void main(String[] args) {
-        SpringApplication.run(DenaApp.class, args);
+        SpringApplication.run(EnergyRegistryApp.class, args);
     }
 }

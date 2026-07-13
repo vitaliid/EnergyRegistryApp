@@ -1,1 +1,1 @@
-rootProject.name = "DenaApp"
+rootProject.name = "EnergyRegistryApp"

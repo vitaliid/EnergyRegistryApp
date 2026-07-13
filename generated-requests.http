@@ -1,6 +1,6 @@
 @keycloak = http://localhost:9090
-@realm = dena-realm
-@client_id = dena-app
+@realm = energyregistry-realm
+@client_id = energyregistry-app
 @redirect_uri = http://localhost:8081/callback
 @code = 53b09224-c9f9-4f6c-bdec-960a218a9823.6f8509fa-f27c-4795-939e-4575ef0b70a4.52d8fd3f-45b4-46a1-b684-7dbd53506721
 @username = testuser
@@ -10,14 +10,14 @@
 @otp = 742455
 
 ### Login link to get the one-time authorization code
-GET http://localhost:9090/realms/dena-realm/protocol/openid-connect/auth?client_id=dena-app&response_type=code&
+GET http://localhost:9090/realms/energyregistry-realm/protocol/openid-connect/auth?client_id=energyregistry-app&response_type=code&
     scope=openid%20profile%20email&redirect_uri=http://localhost:8081/callback&prompt=login
 
 ### Logout
-GET http://localhost:9090/realms/dena-realm/protocol/openid-connect/logout
+GET http://localhost:9090/realms/energyregistry-realm/protocol/openid-connect/logout
 
 ### GET token with MFA
-POST http://localhost:9090/realms/dena-realm/protocol/openid-connect/token
+POST http://localhost:9090/realms/energyregistry-realm/protocol/openid-connect/token
 Content-Type: application/x-www-form-urlencoded
 
 grant_type = authorization_code &
@@ -28,7 +28,7 @@ code = {{code}}
 <> 2026-06-26T161350.200.json
 
 ### GET token with Direct grant
-POST http://localhost:9090/realms/dena-realm/protocol/openid-connect/token
+POST http://localhost:9090/realms/energyregistry-realm/protocol/openid-connect/token
 Content-Type: application/x-www-form-urlencoded
 
 grant_type = password &
