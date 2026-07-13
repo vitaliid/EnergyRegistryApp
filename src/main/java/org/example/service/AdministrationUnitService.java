@@ -3,8 +3,10 @@ package org.example.service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.example.components.UserActionPublisher;
 import org.example.domain.AdministrationUnit;
 import org.example.domain.AdministrationUnitType;
+import org.example.domain.logging.UserActionType;
 import org.example.dto.AdministrationUnitRequest;
 import org.example.dto.AdministrationUnitResponse;
 import org.example.dto.AdministrationUnitUpdateRequest;
@@ -13,6 +15,7 @@ import org.example.repository.AdministrationUnitRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -20,6 +23,7 @@ public class AdministrationUnitService {
 
     private final AdministrationUnitRepository administrationUnitRepository;
     private final AdministrationUnitMapper mapper;
+    private final UserActionPublisher userActionPublisher;
 
     public List<AdministrationUnitResponse> getByType(AdministrationUnitType type) {
         return administrationUnitRepository.findByType(type)
@@ -41,6 +45,13 @@ public class AdministrationUnitService {
         }
 
         AdministrationUnit saved = administrationUnitRepository.save(entity);
+
+        userActionPublisher.success(
+                UserActionType.ADMINISTRATION_UNIT_CREATED,
+                "ADMINISTRATION_UNIT",
+                saved.getId(),
+                Map.of("type", saved.getType().name())
+        );
 
         return mapper.toResponse(saved);
     }
@@ -73,6 +84,15 @@ public class AdministrationUnitService {
             unit.setParent(null);
         }
 
-        return mapper.toResponse(administrationUnitRepository.save(unit));
+        AdministrationUnit saved = administrationUnitRepository.save(unit);
+
+        userActionPublisher.success(
+                UserActionType.ADMINISTRATION_UNIT_UPDATED,
+                "ADMINISTRATION_UNIT",
+                saved.getId(),
+                Map.of()
+        );
+
+        return mapper.toResponse(saved);
     }
 }
