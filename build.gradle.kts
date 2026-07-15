@@ -71,6 +71,8 @@ dependencies {
 
     implementation("io.minio:minio:8.6.0")
 
+    implementation("de.siegmar:logback-gelf:6.1.1")
+
     // Testing suite
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

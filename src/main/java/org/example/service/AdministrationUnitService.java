@@ -1,6 +1,8 @@
 package org.example.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.components.UserActionPublisher;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class AdministrationUnitService {
@@ -34,6 +37,7 @@ public class AdministrationUnitService {
 
     @Transactional(transactionManager = "transactionManager")
     public AdministrationUnitResponse create(AdministrationUnitRequest request) {
+        log.info("Create AdministrationUnit request: {}", request);
         try {
             AdministrationUnit entity = mapper.toEntity(request);
             if (request.getParentId() != null) {
@@ -42,6 +46,7 @@ public class AdministrationUnitService {
                 entity.setParent(parent);
             }
             AdministrationUnit saved = administrationUnitRepository.save(entity);
+            MDC.put("unitId", String.valueOf(saved.getId()));
             userActionPublisher.success(
                     UserActionType.ADMINISTRATION_UNIT_CREATED,
                     "ADMINISTRATION_UNIT",
