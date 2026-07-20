@@ -88,8 +88,8 @@ openApiGenerate {
     inputSpec.set("../register-evrgi-bundle/api/ApiDefinition.yml")
     outputDir.set(layout.buildDirectory.dir("generated/openapi").get().asFile.path)
 
-//    apiPackage.set("org.example.client.api")
-//    modelPackage.set("org.example.client.model")
+    apiPackage.set("org.example.api")
+    modelPackage.set("org.example.model")
 //    invokerPackage.set("org.example.client")
 
     configOptions.set(
