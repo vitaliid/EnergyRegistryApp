@@ -6,6 +6,12 @@ plugins {
 group = "org.example"
 version = "1.0-SNAPSHOT"
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    }
+}
+
 repositories {
     mavenCentral() // IsyFact libraries are available here
 }
@@ -78,8 +84,8 @@ dependencies {
 }
 
 openApiGenerate {
-    generatorName.set("java")
-    inputSpec.set("$rootDir/src/main/resources/openapiexample.yaml")
+    generatorName.set("spring")
+    inputSpec.set("../register-evrgi-bundle/api/ApiDefinition.yml")
     outputDir.set(layout.buildDirectory.dir("generated/openapi").get().asFile.path)
 
 //    apiPackage.set("org.example.client.api")
@@ -88,7 +94,26 @@ openApiGenerate {
 
     configOptions.set(
         mapOf(
-            "library" to "native",
+            "useSpringBoot3" to "true",
+            //Uses jakarta.* package namespace instead of the older javax.*
+            "useJakartaEe" to "true",
+            //Generates only interfaces for API operations
+            "interfaceOnly" to "true",
+            //Keeping the interface clean with just method signatures
+            "skipDefaultInterface" to "true",
+            //Wraps operation return types in Spring's ResponseEntity<T> instead of returning the raw DTO
+            "useResponseEntity" to "true",
+            //Adds Bean Validation annotations to generated model
+            "useBeanValidation" to "true",
+            //Adds @Valid annotations so validation is actually triggered at runtime
+            "performBeanValidation" to "true",
+            //Controls where the @RequestMapping annotation (with the base path) is placed.
+            "requestMappingMode" to "api_interface",
+            //Configures the generator to produce annotations/config compatible with springdoc-openapi
+            "documentationProvider" to "springdoc",
+            //Omits the Generated timestamp comment/annotation that would otherwise appear at the top of generated files
+            "hideGenerationTimestamp" to "true",
+            //Uses java.time types (LocalDate, OffsetDateTime, etc.) for date/date-time fields, instead of legacy
             "dateLibrary" to "java8"
         )
     )
