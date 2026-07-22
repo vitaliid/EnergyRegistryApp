@@ -1,6 +1,7 @@
 plugins {
     id("java")
-    id("org.openapi.generator") version "7.23.0"
+    id("org.springframework.boot") version "4.1.0"
+    id("org.openapi.generator") version "7.24.0"
 }
 
 group = "org.example"
@@ -79,6 +80,9 @@ dependencies {
 
     implementation("de.siegmar:logback-gelf:6.1.1")
 
+    //it is required to distinguish request value "was omitted" from "was explicitly nulled" once deserialized
+    implementation("org.openapitools:jackson-databind-nullable:0.2.6")
+
     // Testing suite
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
@@ -90,13 +94,22 @@ openApiGenerate {
 
     apiPackage.set("org.example.api")
     modelPackage.set("org.example.model")
-//    invokerPackage.set("org.example.client")
+
+    globalProperties.set(
+        mapOf(
+            "models" to "",       // generate models
+            "apis" to "",         // generate api interfaces
+            "supportingFiles" to "false"   // <-- skip pom.xml, README.md, etc.
+        )
+    )
 
     configOptions.set(
         mapOf(
             "useSpringBoot3" to "true",
             //Uses jakarta.* package namespace instead of the older javax.*
             "useJakartaEe" to "true",
+            //Controls where the @RequestMapping annotation (with the base path) is placed.
+            "requestMappingMode" to "api_interface",
             //Generates only interfaces for API operations
             "interfaceOnly" to "true",
             //Keeping the interface clean with just method signatures
@@ -107,8 +120,6 @@ openApiGenerate {
             "useBeanValidation" to "true",
             //Adds @Valid annotations so validation is actually triggered at runtime
             "performBeanValidation" to "true",
-            //Controls where the @RequestMapping annotation (with the base path) is placed.
-            "requestMappingMode" to "api_interface",
             //Configures the generator to produce annotations/config compatible with springdoc-openapi
             "documentationProvider" to "springdoc",
             //Omits the Generated timestamp comment/annotation that would otherwise appear at the top of generated files
@@ -124,6 +135,16 @@ sourceSets {
         java {
             srcDir(layout.buildDirectory.dir("generated/openapi/src/main/java"))
         }
+    }
+}
+
+tasks.compileJava {
+    dependsOn(tasks.openApiGenerate)
+}
+
+tasks.processResources {
+    from("../register-evrgi-bundle/api/ApiDefinition.yml") {
+        into("static")
     }
 }
 
