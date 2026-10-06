@@ -85,11 +85,20 @@ dependencies {
 
     // Testing suite
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+
+    //testcontainers
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation(platform("org.testcontainers:testcontainers-bom:2.0.5"))
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-postgresql")
 }
 
 openApiGenerate {
     generatorName.set("spring")
-    inputSpec.set("../register-evrgi-bundle/api/ApiDefinition.yml")
+    // The spec is copied by processResources into build/resources/main/static (see below),
+    // so it is both the generator input and served as a static resource at runtime.
+    inputSpec.set(layout.buildDirectory.file("resources/main/static/ApiDefinition.yaml").get().asFile.path)
     outputDir.set(layout.buildDirectory.dir("generated/openapi").get().asFile.path)
 
     apiPackage.set("org.example.api")
@@ -125,7 +134,13 @@ openApiGenerate {
             //Omits the Generated timestamp comment/annotation that would otherwise appear at the top of generated files
             "hideGenerationTimestamp" to "true",
             //Uses java.time types (LocalDate, OffsetDateTime, etc.) for date/date-time fields, instead of legacy
-            "dateLibrary" to "java8"
+            "dateLibrary" to "java8",
+            //uses tags to build interfaces
+            "useTags" to "true",
+            //Initialises generated List/Map fields with null instead of an empty collection, so a request
+            //body can distinguish "property absent" (null -> leave unchanged) from "[]" (explicitly empty).
+            //Required for UserUpdate.roles, where [] means "remove all roles in scope".
+            "containerDefaultToNull" to "true"
         )
     )
 }
@@ -142,8 +157,12 @@ tasks.compileJava {
     dependsOn(tasks.openApiGenerate)
 }
 
+tasks.openApiGenerate {
+    dependsOn(tasks.processResources)
+}
+
 tasks.processResources {
-    from("../register-evrgi-bundle/api/ApiDefinition.yml") {
+    from("src/main/resources/api/ApiDefinition.yaml") {
         into("static")
     }
 }

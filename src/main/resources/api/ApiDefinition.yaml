@@ -1,0 +1,1484 @@
+# Language convention: everything in this specification — schema names, properties, enum values,
+# path segments, summaries, descriptions, examples, operationIds, tags and comments — is English.
+
+openapi: 3.0.3
+info:
+  title: ESR-GIR API
+  description: >
+    API for the Energy Supply Register (ESR) and the Gas Infrastructure Register (GIR).
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: API v1
+
+tags:
+  - name: Tasks
+    description: Operations related to tasks
+  - name: AdministrativeUnits
+    description: Operations related to administrative units
+  - name: PublicEntities
+    description: Operations related to public entities
+  - name: Users
+    description: Operations related to user accounts
+  - name: ESR
+    description: Operations related to the Energy Supply Register (ESR)
+
+paths:
+  /tasks:
+    get:
+      tags:
+        - Tasks
+      summary: List all tasks
+      description: Returns the list of all tasks.
+      operationId: listTasks
+      responses:
+        "200":
+          description: Successfully retrieved the list of tasks.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
+  /tasks/{id}/status:
+    patch:
+      tags:
+        - Tasks
+      summary: Change task status
+      description: Toggles the task status between IN_PROGRESS and EMPTY and returns the new status.
+      operationId: toggleTaskStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Uuid'
+      responses:
+        "200":
+          description: The task's new status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskStatus'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
+  /administrative-units:
+    get:
+      tags:
+        - AdministrativeUnits
+      summary: List administrative units
+      description: >
+        Returns the administrative units within the caller's scope: the units on which the
+        caller holds any role and all units subordinate to them. Every role is inherited
+        downwards along the administrative hierarchy.
+      operationId: listAdministrativeUnits
+      responses:
+        "200":
+          description: Successfully retrieved the list of administrative units.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdministrativeUnit'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
+  /administrative-units/{id}:
+    get:
+      tags:
+        - AdministrativeUnits
+      summary: Get administrative unit by ID
+      description: >
+        Returns a single administrative unit by its unique identifier. The unit must lie within
+        the caller's scope: a unit on which the caller holds any role, or one subordinate to such
+        a unit. A unit outside the caller's scope is reported as not found.
+      operationId: getAdministrativeUnitById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Uuid'
+      responses:
+        "200":
+          description: Successfully retrieved the administrative unit.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdministrativeUnit'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
+  /administrative-units/apply-changeset:
+    post:
+      tags:
+        - AdministrativeUnits
+      summary: Applies a changeset to the administrative unit structure
+      description: Returns a single administrative unit by its unique identifier.
+      operationId: applyAdminUnitChangeset
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Migration was successfully applied
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
+  /public-entities:
+    get:
+      tags:
+        - PublicEntities
+      summary: List public entities
+      description: >
+        Returns the public entities within the caller's scope: the entities on which the caller
+        holds any role directly, and every entity belonging to an administrative unit on which
+        the caller holds any role or which is subordinate to such a unit. Every role is inherited
+        downwards along the administrative hierarchy.
+      operationId: listPublicEntities
+      responses:
+        "200":
+          description: Successfully retrieved the list of public entities.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicEntity'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - PublicEntities
+      summary: Create a public entity
+      description: >
+        Creates a new public entity assigned to an administrative unit. Only a caller holding the
+        ADMIN role may create public entities, and only under an administrative unit within the
+        caller's Admin scope: a unit on which the caller holds ADMIN, or one subordinate to such
+        a unit. A unit outside that scope is rejected as forbidden.
+      operationId: createPublicEntity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicEntityCreate'
+      responses:
+        "201":
+          description: The public entity was created.
+          headers:
+            Location:
+              description: URI of the newly created public entity.
+              schema:
+                type: string
+                example: /api/v1/public-entities/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicEntity'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
+  /public-entities/{id}:
+    get:
+      tags:
+        - PublicEntities
+      summary: Get public entity by ID
+      description: >
+        Returns a single public entity by its unique identifier. The entity must lie within the
+        caller's scope: an entity on which the caller holds any role directly, or one belonging
+        to an administrative unit on which the caller holds any role or which is subordinate to
+        such a unit. An entity outside the caller's scope is reported as not found.
+      operationId: getPublicEntityById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Uuid'
+      responses:
+        "200":
+          description: Successfully retrieved the public entity.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicEntity'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      tags:
+        - PublicEntities
+      summary: Patch a public entity
+      description: >
+        Partially updates a public entity. Only the supplied fields are changed. Only a caller
+        holding the ADMIN role may update public entities, and only those within the caller's
+        Admin scope; an entity outside that scope is reported as not found. Reassigning the entity
+        to an administrative unit outside the caller's Admin scope is rejected as forbidden.
+      operationId: patchPublicEntity
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Uuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicEntityUpdate'
+      responses:
+        "200":
+          description: The public entity was updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicEntity'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - PublicEntities
+      summary: Delete a public entity
+      description: >
+        Deletes a public entity by its unique identifier. Only a caller holding the ADMIN role may
+        delete public entities, and only those within the caller's Admin scope; an entity outside
+        that scope is reported as not found.
+      operationId: deletePublicEntity
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Uuid'
+      responses:
+        "204":
+          description: The public entity was deleted.
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
+  /users:
+    get:
+      tags:
+        - Users
+      summary: List users
+      description: >
+        Returns the users visible to the calling Admin.
+        Only the roles inside the caller's scope are included.
+      operationId: listUsers
+      responses:
+        "200":
+          description: Successfully retrieved the list of users.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - Users
+      summary: Create a user
+      description: >
+        Creates a new user and, optionally, its initial roles. The assignment must lie within
+        the calling Admin's scope (403 otherwise). A role whose unit lies outside the calling
+        Admin's scope is rejected as a bad request (400).
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        "201":
+          description: The user was created.
+          headers:
+            Location:
+              description: URI of the newly created user.
+              schema:
+                type: string
+                example: /api/v1/users/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Get user by ID
+      description: >
+        Returns a single user by ID. Only roles within the calling Admin's scope are
+        returned.
+      operationId: getUserById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Uuid'
+      responses:
+        "200":
+          description: Successfully retrieved the user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      tags:
+        - Users
+      summary: Update a user
+      description: >
+        Partially updates a user's first name, last name, e-mail address, assignment and/or
+        roles.
+      operationId: patchUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Uuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        "200":
+          description: The user was updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Users
+      summary: Deactivate a user
+      description: >
+        Deactivates a user. The record is not removed. All roles of the user are
+        revoked, so every role must lie within the calling Admin's scope
+        (403 otherwise). An Admin cannot deactivate their own record.
+      operationId: deactivateUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Uuid'
+        - name: confirmed
+          in: query
+          required: false
+          description: >
+            Confirms deactivation of the last active Admin of a unit or public
+            entity the user holds the ADMIN role on, after the warning has been
+            shown to the user.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: The user was deactivated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "409":
+          $ref: '#/components/responses/Conflict'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
+  # ESR building consumption entries of a public entity
+  /public-entities/{id}/esr/buildings:
+    get:
+      tags:
+        - ESR
+        - PublicEntities
+      summary: Fetches the ESR entries for a public entity
+      operationId: getBuildingEsrEntries
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Uuid'
+      responses:
+        "200":
+          description: The list of ESR (building) entries for the public entity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AbstractBuildingConsumption'   # building consumption (plain | heat-only)
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - ESR
+        - PublicEntities
+      summary: Create a new ESR (building) entry for the public entity
+      operationId: createBuildingEsrEntry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Uuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AbstractBuildingConsumptionInput'   # building consumption (plain | heat-only)
+      responses:
+        "200":
+          description: The ESR entry was created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AbstractBuildingConsumption'   # building consumption (plain | heat-only)
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
+  # single building consumption entry
+  /public-entities/{publicEntityId}/esr/buildings/{id}:
+    put:
+      tags:
+        - ESR
+        - PublicEntities
+      summary: Replace an ESR (building) entry for the public entity
+      operationId: replaceBuildingEsrEntry
+      parameters:
+        - name: publicEntityId
+          in: path
+          required: true
+          description: The public entity the entry belongs to
+          schema:
+            $ref: '#/components/schemas/Uuid'
+        - name: id
+          in: path
+          required: true
+          description: ID of the ESR entry
+          schema:
+            $ref: '#/components/schemas/Uuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AbstractBuildingConsumptionInput'   # building consumption (plain | heat-only)
+      responses:
+        "200":
+          description: The ESR entry was replaced.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AbstractBuildingConsumption'   # building consumption (plain | heat-only)
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - ESR
+        - PublicEntities
+      summary: Delete an ESR (building) entry for the public entity
+      operationId: deleteBuildingEsrEntry
+      parameters:
+        - name: publicEntityId
+          in: path
+          required: true
+          description: The public entity the entry belongs to
+          schema:
+            $ref: '#/components/schemas/Uuid'
+        - name: id
+          in: path
+          required: true
+          description: ID of the ESR entry
+          schema:
+            $ref: '#/components/schemas/Uuid'
+      responses:
+        "200":
+          description: The ESR entry was deleted.
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
+  # categories of the building classification catalogue (BWZK)
+  /esr/buildings/categories:
+    get:
+      tags:
+        - ESR
+      summary: Fetch all building consumption categories.
+      operationId: listBuildingConsumptionCategories
+      responses:
+        "200":
+          description: All building consumption categories.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BuildingConsumptionCategory'   # building consumption category (BWZK)
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
+  # units of energy carriers
+  /esr/energy-carriers/units:
+    get:
+      tags:
+        - ESR
+      summary: Fetch all energy carrier units.
+      operationId: listEnergyCarrierUnits
+      responses:
+        "200":
+          description: All energy carrier units.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EnergyCarrierUnit'   # unit of an energy carrier
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
+
+security:
+  - bearerAuth: [ ]
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT Bearer authentication
+  schemas:
+
+    # EnergyCarrier = energy carrier (electricity, heating oil, natural gas ...).
+    EnergyCarrier:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        name:
+          type: string
+          example: "Electricity"
+
+    # EnergyCarrierUnit = unit of an energy carrier (l, m³, kWh ...).
+    # Master data: one row per (carrier, unit) with its conversion factor to kWh.
+    EnergyCarrierUnit:
+      type: object
+      required:
+        - id
+        - carrier
+        - name
+        - conversionFactor
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        carrier:
+          $ref: '#/components/schemas/EnergyCarrier'   # energy carrier
+        name:
+          type: string
+          example: "kWh"
+        conversionFactor:   # conversion factor (to kWh)
+          $ref: '#/components/schemas/Decimal22_10'   # decimal(22,10) as string
+
+    # BuildingConsumptionCategory = building consumption category.
+    # Master data: a BWZK (building classification catalogue) number, e.g. 0200.
+    BuildingConsumptionCategory:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        name:
+          type: string
+          example: "0200"
+
+    # EnergyCarrierConsumption = consumption of an energy carrier.
+    # Value object: which unit (and thereby which carrier) + how much (quantity).
+    EnergyCarrierConsumption:
+      type: object
+      required:
+        - id
+        - unit
+        - quantity
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        unit:
+          $ref: '#/components/schemas/EnergyCarrierUnit'   # unit of an energy carrier
+        quantity:   # consumed quantity
+          $ref: '#/components/schemas/Decimal22_10'   # decimal(22,10) as string
+
+    # Building consumption – common base
+    BuildingConsumptionBase:
+      type: object
+      required:
+        - id
+        - publicEntity
+        - category
+        - consumption
+        - start
+        - end
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        publicEntity:
+          $ref: '#/components/schemas/PublicEntityReference'
+        category:
+          $ref: '#/components/schemas/BuildingConsumptionCategory'   # building consumption category (BWZK)
+        consumption:
+          $ref: '#/components/schemas/EnergyCarrierConsumption'   # consumption of an energy carrier (unit + quantity)
+        start:   # start date of consumption
+          type: string
+          format: date
+          example: 1.1.2026
+        end:   # end date of consumption
+          type: string
+          format: date
+          example: 1.1.2027
+
+    # AbstractBuildingConsumption = abstract building consumption
+    AbstractBuildingConsumption:
+      oneOf:
+        - $ref: '#/components/schemas/BuildingConsumption'   # building consumption, not heat-only
+        - $ref: '#/components/schemas/HeatBuildingConsumption'   # building consumption, heat-only
+      discriminator:
+        propertyName: objectType
+        mapping:
+          BuildingConsumption: '#/components/schemas/BuildingConsumption'   # building consumption, not heat-only
+          HeatBuildingConsumption: '#/components/schemas/HeatBuildingConsumption'   # building consumption, heat-only
+
+    # BuildingConsumption = building consumption
+    # Answer 'No' to 'exclusively for heat generation?' -> no climate-factor question.
+    BuildingConsumption:
+      type: object
+      required:
+        - objectType
+      properties:
+        objectType:   # discriminator: BuildingConsumption | HeatBuildingConsumption
+          type: string
+          example: "BuildingConsumption"
+      allOf:
+        - $ref: '#/components/schemas/BuildingConsumptionBase'
+
+    # HeatBuildingConsumption = heat building consumption
+    # Answer 'Yes' to 'exclusively for heat generation?' -> has isWeatherAdjusted (weather-adjusted with DWD climate factors?).
+    HeatBuildingConsumption:
+      type: object
+      required:
+        - objectType
+        - isWeatherAdjusted
+      properties:
+        objectType:   # discriminator: BuildingConsumption | HeatBuildingConsumption
+          type: string
+          example: "HeatBuildingConsumption"
+        isWeatherAdjusted:   # is weather-adjusted (with DWD climate factors)?
+          type: boolean
+      allOf:
+        - $ref: '#/components/schemas/BuildingConsumptionBase'
+
+    # BuildingConsumptionBaseInput = building consumption base input
+    BuildingConsumptionBaseInput:
+      type: object
+      required:
+        - carrier
+        - quantity
+        - category
+        - start
+        - end
+      properties:
+        carrier:   # energy carrier id
+          $ref: '#/components/schemas/Uuid'
+        quantity:   # consumed quantity
+          $ref: '#/components/schemas/Decimal22_10'   # decimal(22,10) as string
+        category:   # category id
+          $ref: '#/components/schemas/Uuid'
+        start:   # start date of consumption
+          type: string
+          format: date
+          example: 1.1.2026
+        end:   # end date of consumption
+          type: string
+          format: date
+          example: 1.1.2027
+
+    # Abstract building consumption input
+    # oneOf: BuildingConsumptionInput (not heat-only) | HeatBuildingConsumptionInput (heat-only); objectType says which.
+    AbstractBuildingConsumptionInput:
+      oneOf:
+        - $ref: '#/components/schemas/BuildingConsumptionInput'   # not heat-only
+        - $ref: '#/components/schemas/HeatBuildingConsumptionInput'   # heat-only
+      discriminator:
+        propertyName: objectType
+        mapping:
+          BuildingConsumption: '#/components/schemas/BuildingConsumptionInput'
+          HeatBuildingConsumption: '#/components/schemas/HeatBuildingConsumptionInput'
+
+    # Building consumption input, not heat-only.
+    BuildingConsumptionInput:
+      type: object
+      required:
+        - objectType
+      properties:
+        objectType:
+          type: string
+          example: "BuildingConsumption"
+        isWeatherAdjusted:   # is weather-adjusted? (NOTE: belongs to Heat... only)
+          type: boolean
+      allOf:
+        - $ref: '#/components/schemas/BuildingConsumptionBaseInput'
+
+    # Heat building consumption input, heat-only.
+    HeatBuildingConsumptionInput:
+      type: object
+      required:
+        - objectType
+        - isWeatherAdjusted
+      properties:
+        objectType:
+          type: string
+          example: "HeatBuildingConsumption"
+        isWeatherAdjusted:   # is weather-adjusted (with DWD climate factors)?
+          type: boolean
+      allOf:
+        - $ref: '#/components/schemas/BuildingConsumptionBaseInput'
+
+    Decimal22_10:
+      type: string
+      example: "012345678901.0123456789"
+      description: A number in the decimal(22, 10) format. I.e. 22 digits overall, 10 of which are after the decimal point.
+
+    ErrorResponse:
+      type: object
+      description: Standard error response returned by the API.
+      required:
+        - title
+        - status
+        - code
+      properties:
+        title:
+          type: string
+          description: Short summary of the error.
+          example: Validation failed
+
+        additionalInformation:
+          type: object
+          additionalProperties: { type: object }
+
+        status:
+          type: integer
+          format: int32
+          description: HTTP status code.
+          example: 400
+
+        detail:
+          type: string
+          description: Detailed explanation of the error.
+          example: Postal code is invalid.
+
+        code:
+          type: string
+          description: Machine-readable application error code.
+          example: ADDRESS_001
+
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp when the error occurred.
+          example: "2026-07-16T14:20:11Z"
+
+        instance:
+          type: string
+          description: URI identifying the request that caused the error.
+          example: /api/v1/tasks/3fa85f64-5717-4562-b3fc-2c963f66afa6/status
+
+        traceId:
+          type: string
+          description: Correlation identifier for troubleshooting.
+          example: 9b35d80dcbfd
+
+    Task:
+      type: object
+      description: A task tracked in the system.
+      required:
+        - id
+        - title
+        - status
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        title:
+          type: string
+          description: Title of the task.
+          example: Review energy readings for Q3
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+
+    TaskStatus:
+      type: string
+      description: Status of the task.
+      enum:
+        - IN_PROGRESS
+        - EMPTY
+      example: IN_PROGRESS
+
+    AdministrativeUnit:
+      type: object
+      description: Represents an administrative unit (NUTS/LAU) in the system.
+      required:
+        - id
+        - name
+        - objectType
+      properties:
+        objectType:
+          type: string
+          example: "NutsLau"
+        id:
+          $ref: '#/components/schemas/Uuid'
+        name:
+          type: string
+          description: Name of the administrative unit.
+          example: Berlin
+        code:
+          type: string
+          maxLength: 16
+          description: NUTS or LAU code of the administrative unit.
+          example: DE2
+        populationCount:
+          type: integer
+          description: Population count of the administrative unit.
+          example: 3685265
+        levelType:
+          type: integer
+          description: "Hierarchy level of the administrative unit: 1 = NUTS-1, 2 = NUTS-2, 3 = NUTS-3, 4 = LAU."
+          example: 1
+        parent:
+          $ref: '#/components/schemas/AdministrativeUnitReference'
+
+    PublicEntity:
+      type: object
+      description: Represents a public entity belonging to an administrative unit.
+      required:
+        - id
+        - name
+        - administrativeUnit
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        name:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Name of the public entity.
+          example: Municipal swimming pool Mitte
+        administrativeUnit:
+          $ref: '#/components/schemas/AdministrativeUnitReference'
+
+    AdministrativeUnitReference:
+      type: object
+      description: Reduced representation of an administrative unit, used for parent references.
+      required:
+        - id
+        - name
+        - objectType
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        objectType:
+          type: string
+          example: "NutsLau"
+        name:
+          type: string
+          description: Name of the administrative unit.
+          example: Berlin
+        code:
+          type: string
+          maxLength: 16
+          description: NUTS or LAU code of the administrative unit.
+          example: DE2
+        levelType:
+          type: integer
+          description: "Hierarchy level of the administrative unit: 1 = NUTS-1, 2 = NUTS-2, 3 = NUTS-3, 4 = LAU."
+          example: 1
+
+    PublicEntityReference:
+      type: object
+      description: Reduced representation of a public entity, used for user assignments.
+      required:
+        - id
+        - name
+        - objectType
+      properties:
+        objectType:
+          type: string
+          example: "public-entity"
+        id:
+          $ref: '#/components/schemas/Uuid'
+        name:
+          type: string
+          description: Name of the public entity.
+          example: Municipal swimming pool Mitte
+
+    PublicEntityCreate:
+      type: object
+      description: Payload for creating a public entity.
+      required:
+        - name
+        - administrativeUnitId
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Name of the public entity.
+          example: Municipal swimming pool Mitte
+        administrativeUnitId:
+          allOf:
+            - $ref: '#/components/schemas/Uuid'
+          description: Identifier of the administrative unit the public entity belongs to.
+
+    PublicEntityUpdate:
+      type: object
+      description: Payload for partially updating a public entity. At least one field must be supplied.
+      minProperties: 1
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: New name of the public entity.
+          example: Municipal swimming pool Mitte
+        administrativeUnitId:
+          allOf:
+            - $ref: '#/components/schemas/Uuid'
+          description: Identifier of the administrative unit the public entity is reassigned to.
+
+    User:
+      type: object
+      description: A user account
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+        - active
+        - assignment
+        - roles
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: First name
+          example: Luka
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Last name
+          example: Mayr
+        email:
+          type: string
+          format: email
+          minLength: 3
+          maxLength: 254
+          description: E-mail address
+          example: luka.mayr@home.de
+        active:
+          type: boolean
+          description: Whether the user account is active
+          example: true
+        assignment:
+          $ref: '#/components/schemas/AssignmentReference'
+        roles:
+          type: array
+          description: >
+            Roles of the user that lie within the calling Admin's scope.
+          items:
+            $ref: '#/components/schemas/UserRole'
+
+    Role:
+      type: string
+      description: >
+        Role of a user within a scope. The functional roles are register-specific
+        (ESR = Energy Supply Register, GIR = Gas Infrastructure Register); ADMIN is cross-register.
+      enum:
+        - ESR_EDITOR
+        - ESR_APPROVER
+        - ESR_VIEWER
+        - GIR_EDITOR
+        - GIR_APPROVER
+        - GIR_VIEWER
+        - ADMIN
+      example: ESR_EDITOR
+
+    UserRole:
+      type: object
+      description: >
+        A role of a user within a scope (administrative unit or public entity). The role is
+        inherited downwards: it applies to the scope itself and to every unit below it.
+      required:
+        - id
+        - role
+        - assignment
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        role:
+          $ref: '#/components/schemas/Role'
+        assignment:
+          $ref: '#/components/schemas/AssignmentReference'
+
+    UserRoleCreate:
+      type: object
+      description: >
+        Payload for assigning a role to a user on an administrative unit or a public entity.
+        The role also applies to everything below that unit in the administrative hierarchy.
+      required:
+        - role
+      properties:
+        role:
+          $ref: '#/components/schemas/Role'
+        administrativeUnitId:
+          allOf:
+            - $ref: '#/components/schemas/Uuid'
+          description: Identifier of the administrative unit the role applies to.
+        publicEntityId:
+          allOf:
+            - $ref: '#/components/schemas/Uuid'
+          description: Identifier of the public entity the role applies to.
+      oneOf:
+        - required: [ administrativeUnitId ]
+          not:
+            required: [ publicEntityId ]
+        - required: [ publicEntityId ]
+          not:
+            required: [ administrativeUnitId ]
+
+    AssignmentReference:
+      type: object
+      description: The organisational unit the user is assigned to.
+      oneOf:
+        - $ref: '#/components/schemas/AdministrativeUnitReference'
+        - $ref: '#/components/schemas/PublicEntityReference'
+      discriminator:
+        propertyName: objectType
+        mapping:
+          administrativeUnitReference: '#/components/schemas/AdministrativeUnitReference'
+          publicEntityReference: '#/components/schemas/PublicEntityReference'
+
+    AssignmentType:
+      type: string
+      description: Discriminator for the organisational unit a user is assigned to.
+      enum:
+        - administrativeUnitReference
+        - publicEntityReference
+
+    UserCreate:
+      type: object
+      description: Payload for creating a user
+      required:
+        - firstName
+        - lastName
+        - email
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Luka
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Mayr
+        email:
+          type: string
+          format: email
+          minLength: 3
+          maxLength: 254
+          example: luka.mayr@home.de
+        administrativeUnitId:
+          allOf:
+            - $ref: '#/components/schemas/Uuid'
+          description: Identifier of the administrative unit the user belongs to.
+        publicEntityId:
+          allOf:
+            - $ref: '#/components/schemas/Uuid'
+          description: Identifier of the public entity the user belongs to.
+        roles:
+          type: array
+          description: Initial roles. Every unit must lie within the calling Admin's scope.
+          items:
+            $ref: '#/components/schemas/UserRoleCreate'
+      oneOf:
+        - required: [ administrativeUnitId ]
+          not:
+            required: [ publicEntityId ]
+        - required: [ publicEntityId ]
+          not:
+            required: [ administrativeUnitId ]
+
+    UserUpdate:
+      type: object
+      description: Payload for partially updating a user. At least one field must be supplied.
+      minProperties: 1
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Luka
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Mayr
+        email:
+          type: string
+          format: email
+          minLength: 3
+          maxLength: 254
+          example: luka.mayr@home.de
+        administrativeUnitId:
+          allOf:
+            - $ref: '#/components/schemas/Uuid'
+          description: Identifier of the administrative unit the user is reassigned to.
+        publicEntityId:
+          allOf:
+            - $ref: '#/components/schemas/Uuid'
+          description: Identifier of the public entity the user is reassigned to.
+        roles:
+          type: array
+          description: >
+            Desired roles within the calling Admin's scope. Three cases:
+            (1) property absent or null - the user's roles are left untouched;
+            (2) empty array - all of the user's roles within the calling Admin's scope are removed;
+            (3) non-empty array - exactly these roles remain within the calling Admin's scope:
+            listed roles that do not exist yet are added, existing roles that are not listed are
+            removed, matching roles are left unchanged.
+          items:
+            $ref: '#/components/schemas/UserRoleCreate'
+      # At most one of the two: a patch may carry neither, for example when only roles change.
+      not:
+        required: [ administrativeUnitId, publicEntityId ]
+
+    Uuid:
+      type: string
+      format: uuid
+      description: Universally unique identifier.
+      example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+
+  responses:
+    BadRequest:
+      description: The request is invalid.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            badRequest:
+              summary: Invalid request example
+              value:
+                title: Validation failed
+                status: 400
+                detail: The supplied identifier is not a valid UUID.
+                code: VALIDATION_001
+                timestamp: "2026-07-16T14:20:11Z"
+                instance: /api/v1/tasks/not-a-uuid/status
+                traceId: 9b35d80dcbfd
+            missingRequiredField:
+              summary: Required field missing (bean validation)
+              value:
+                title: Validation failed
+                status: 400
+                code: REQUIRED_FIELD_MISSING
+            invalidFieldFormat:
+              summary: Blank or malformed field value
+              value:
+                title: Validation failed
+                status: 400
+                code: INVALID_FIELD_FORMAT
+            duplicateNameInParent:
+              summary: Name already used within the same administrative unit
+              value:
+                title: Conflict
+                status: 400
+                code: DUPLICATE_NAME_IN_PARENT
+            invalidParent:
+              summary: Referenced administrative unit does not exist
+              value:
+                title: Invalid reference
+                status: 400
+                code: INVALID_PARENT
+
+    NotFound:
+      description: The requested resource was not found.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            notFound:
+              summary: Resource not found example
+              value:
+                title: Resource not found
+                status: 404
+                detail: No resource exists with the given id.
+                code: RESOURCE_001
+                timestamp: "2026-07-16T14:20:11Z"
+                instance: /api/v1/tasks/3fa85f64-5717-4562-b3fc-2c963f66afa6/status
+                traceId: 9b35d80dcbfd
+            entityNotFound:
+              summary: Public entity not found
+              value:
+                title: Entity not found
+                status: 404
+                code: ENTITY_NOT_FOUND
+
+    Conflict:
+      description: The request conflicts with the current state of the resource.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            lastAdminConfirmationRequired:
+              summary: Deactivating the last Admin of an assignment needs explicit confirmation
+              value:
+                title: Conflict
+                status: 409
+                detail: >
+                  This is the last active Admin of the assigned administrative unit
+                  or public entity. Repeat the request with confirmed=true to confirm.
+                code: LAST_ADMIN_CONFIRMATION_REQUIRED
+
+    InternalServerError:
+      description: An unexpected server error occurred.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            internalError:
+              summary: Unexpected server error example
+              value:
+                title: Internal server error
+                status: 500
+                detail: An unexpected error occurred while processing the request.
+                code: SYS_001
+                timestamp: "2026-07-16T14:20:11Z"
+                instance: /api/v1/tasks/3fa85f64-5717-4562-b3fc-2c963f66afa6/status
+                traceId: 9b35d80dcbfd
+
+    Unauthorized:
+      description: Missing, invalid, or expired bearer token.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            unauthorized:
+              summary: Missing or invalid token example
+              value:
+                title: Unauthorized
+                status: 401
+                detail: Authentication is required to access this resource.
+                code: AUTH_001
+                timestamp: "2026-07-16T14:20:11Z"
+                instance: /api/v1/tasks/3fa85f64-5717-4562-b3fc-2c963f66afa6/status
+                traceId: 9b35d80dcbfd
+
+    Forbidden:
+      description: Lacking the required permission.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            forbidden:
+              summary: Insufficient permission example
+              value:
+                title: Forbidden
+                status: 403
+                detail: You do not have the required permission for this operation.
+                code: AUTH_002
+                timestamp: "2026-07-16T14:20:11Z"
+                instance: /api/v1/tasks/3fa85f64-5717-4562-b3fc-2c963f66afa6/status
+                traceId: 9b35d80dcbfd
