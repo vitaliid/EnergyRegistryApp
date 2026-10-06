@@ -41,3 +41,6 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+# IntelliJ HTTP Client secrets (use the committed .example file as a template).
+http-client.private.env.json
