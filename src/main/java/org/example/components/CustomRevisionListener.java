@@ -1,7 +1,7 @@
 package org.example.components;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.example.domain.CustomRevisionEntity;
+import org.example.entity.CustomRevisionEntity;
 import org.example.filter.RequestIdFilter;
 import org.hibernate.envers.RevisionListener;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;

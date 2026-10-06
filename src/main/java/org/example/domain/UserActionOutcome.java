@@ -1,4 +1,4 @@
-package org.example.domain.logging;
+package org.example.domain;
 
 public enum UserActionOutcome {
     SUCCESS,

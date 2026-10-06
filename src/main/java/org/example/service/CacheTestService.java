@@ -1,7 +1,7 @@
 package org.example.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.repository.AdministrationUnitRepository;
+import org.example.repository.UserActionLogRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,15 +10,15 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CacheTestService {
 
-    private final AdministrationUnitRepository repository;
+    private final UserActionLogRepository repository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void loadFirst(Integer id) {
+    public void loadFirst(Long id) {
         repository.findById(id).orElseThrow();
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void loadSecond(Integer id) {
+    public void loadSecond(Long id) {
         repository.findById(id).orElseThrow();
     }
 }

@@ -3,7 +3,7 @@ package org.example.service;
 import lombok.RequiredArgsConstructor;
 import org.example.components.EnergyMetrics;
 import org.example.components.UserActionKafkaPublisher;
-import org.example.domain.logging.UserActionType;
+import org.example.domain.UserActionType;
 import org.example.dto.EnergyProperties;
 import org.example.dto.EnergyReadingRequest;
 import org.example.dto.EnergyReadingResponse;

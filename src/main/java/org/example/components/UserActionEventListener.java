@@ -1,8 +1,8 @@
 package org.example.components;
 
 import lombok.RequiredArgsConstructor;
-import org.example.domain.UserActionLog;
-import org.example.domain.logging.UserActionEvent;
+import org.example.entity.UserActionLog;
+import org.example.domain.UserActionEvent;
 import org.example.repository.UserActionLogRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;

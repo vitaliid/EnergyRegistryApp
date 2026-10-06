@@ -2,9 +2,9 @@ package org.example.components;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.example.domain.logging.UserActionEvent;
-import org.example.domain.logging.UserActionOutcome;
-import org.example.domain.logging.UserActionType;
+import org.example.domain.UserActionEvent;
+import org.example.domain.UserActionOutcome;
+import org.example.domain.UserActionType;
 import org.example.filter.RequestIdFilter;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;

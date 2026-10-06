@@ -1,12 +1,12 @@
-package org.example.domain;
+package org.example.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.domain.logging.UserActionEvent;
-import org.example.domain.logging.UserActionOutcome;
-import org.example.domain.logging.UserActionType;
+import org.example.domain.UserActionEvent;
+import org.example.domain.UserActionOutcome;
+import org.example.domain.UserActionType;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 

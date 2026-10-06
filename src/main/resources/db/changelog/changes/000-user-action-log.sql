@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset vitalii:005-create-user-action-log
+--changeset vitalii:000-create-user-action-log
 
 CREATE TABLE user_action_log
 (
@@ -23,12 +23,9 @@ CREATE TABLE user_action_log
         CHECK (outcome IN ('SUCCESS', 'FAILURE', 'DENIED'))
 );
 
---rollback DROP TABLE user_action_log;
-
---changeset vitalii:005-create-user-action-log-indexes
-CREATE INDEX idx_user_action_log_actor_id ON user_action_log(actor_id);
-CREATE INDEX idx_user_action_log_action ON user_action_log(action);
-CREATE INDEX idx_user_action_log_occurred_at ON user_action_log(occurred_at);
-CREATE INDEX idx_user_action_log_target_type ON user_action_log(target_type);
-CREATE INDEX idx_user_action_log_target_id ON user_action_log(target_id);
-CREATE INDEX idx_user_action_log_request_id ON user_action_log(request_id);
+CREATE INDEX idx_user_action_log_actor_id ON user_action_log (actor_id);
+CREATE INDEX idx_user_action_log_action ON user_action_log (action);
+CREATE INDEX idx_user_action_log_occurred_at ON user_action_log (occurred_at);
+CREATE INDEX idx_user_action_log_target_type ON user_action_log (target_type);
+CREATE INDEX idx_user_action_log_target_id ON user_action_log (target_id);
+CREATE INDEX idx_user_action_log_request_id ON user_action_log (request_id);
