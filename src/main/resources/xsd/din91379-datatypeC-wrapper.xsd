@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Declares a root element of type datatypeC so that a text can be validated against DIN 91379 Form C. -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:din="urn:xoev-de:kosit:xoev:datentyp:din-91379_2022-08"
+           targetNamespace="urn:example:din91379-validation"
+           elementFormDefault="qualified">
+    <xs:import namespace="urn:xoev-de:kosit:xoev:datentyp:din-91379_2022-08"
+               schemaLocation="din-norm-91379-datatypes.xsd"/>
+    <xs:element name="text" type="din:datatypeC"/>
+</xs:schema>
