@@ -43,6 +43,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 
+    //keycloak admin api: user accounts (name, e-mail, enabled) live in Keycloak, see KeycloakUserService
+    implementation("org.keycloak:keycloak-admin-client:26.0.4")
+
     //metrics
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("org.springframework.boot:spring-boot-starter-aop:3.5.3")

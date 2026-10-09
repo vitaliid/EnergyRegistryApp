@@ -1,11 +1,12 @@
 package org.example.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.example.api.EsrApi;
 import org.example.model.AbstractBuildingConsumption;
 import org.example.model.AbstractBuildingConsumptionInput;
 import org.example.model.BuildingConsumptionCategory;
 import org.example.model.EnergyCarrierUnit;
-import org.springframework.http.HttpStatus;
+import org.example.service.EsrConsumptionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,50 +14,53 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Implements the generated {@link EsrApi} (tag "ESR" – Energy Supply Register).
- * Covers the building consumption entries of a public entity and the ESR master data
- * (building consumption categories, energy carrier units).
- * All operations are stubs until the service layer is wired in.
+ * Energy Supply Register (ESR): building consumption entries of an outside public area and the ESR master data.
  */
 @RestController
+@RequiredArgsConstructor
 public class EsrController implements EsrApi {
 
-    // --- building consumption entries of a public entity ---
+    private final EsrConsumptionService esrConsumptionService;
+
+    // --- building consumption entries of an outside public area ---
 
     @Override
     public ResponseEntity<List<AbstractBuildingConsumption>> getBuildingEsrEntries(UUID id) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        return ResponseEntity.ok(esrConsumptionService.getAll(id));
     }
 
     @Override
     public ResponseEntity<AbstractBuildingConsumption> createBuildingEsrEntry(
             UUID id,
             AbstractBuildingConsumptionInput abstractBuildingConsumptionInput) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        return ResponseEntity.ok(esrConsumptionService.create(id, abstractBuildingConsumptionInput));
     }
 
     @Override
     public ResponseEntity<AbstractBuildingConsumption> replaceBuildingEsrEntry(
-            UUID publicEntityId,
+            UUID outsidePublicAreaId,
             UUID id,
             AbstractBuildingConsumptionInput abstractBuildingConsumptionInput) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        return ResponseEntity.ok(esrConsumptionService.update(outsidePublicAreaId, id, abstractBuildingConsumptionInput));
     }
 
     @Override
-    public ResponseEntity<Void> deleteBuildingEsrEntry(UUID publicEntityId, UUID id) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    public ResponseEntity<Void> deleteBuildingEsrEntry(UUID outsidePublicAreaId, UUID id) {
+        esrConsumptionService.delete(outsidePublicAreaId, id);
+        return ResponseEntity.ok().build();
     }
 
     // --- master data ---
 
     @Override
     public ResponseEntity<List<BuildingConsumptionCategory>> listBuildingConsumptionCategories() {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        // TODO master data: return the BWZK categories once the table exists
+        return ResponseEntity.ok(List.of());
     }
 
     @Override
     public ResponseEntity<List<EnergyCarrierUnit>> listEnergyCarrierUnits() {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        // TODO master data: return the energy carrier units once the table exists
+        return ResponseEntity.ok(List.of());
     }
 }

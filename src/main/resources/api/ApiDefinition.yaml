@@ -13,91 +13,35 @@ servers:
     description: API v1
 
 tags:
-  - name: Tasks
-    description: Operations related to tasks
-  - name: AdministrativeUnits
-    description: Operations related to administrative units
-  - name: PublicEntities
-    description: Operations related to public entities
+  - name: HomeAdministrativeAreas
+    description: Operations related to home administrative areas
+  - name: OutsidePublicAreas
+    description: Operations related to outside public areas
   - name: Users
     description: Operations related to user accounts
   - name: ESR
     description: Operations related to the Energy Supply Register (ESR)
 
 paths:
-  /tasks:
+  /home-administrative-areas:
     get:
       tags:
-        - Tasks
-      summary: List all tasks
-      description: Returns the list of all tasks.
-      operationId: listTasks
-      responses:
-        "200":
-          description: Successfully retrieved the list of tasks.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Task'
-        "401":
-          $ref: '#/components/responses/Unauthorized'
-        "403":
-          $ref: '#/components/responses/Forbidden'
-        "500":
-          $ref: '#/components/responses/InternalServerError'
-
-  /tasks/{id}/status:
-    patch:
-      tags:
-        - Tasks
-      summary: Change task status
-      description: Toggles the task status between IN_PROGRESS and EMPTY and returns the new status.
-      operationId: toggleTaskStatus
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/Uuid'
-      responses:
-        "200":
-          description: The task's new status
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TaskStatus'
-        "400":
-          $ref: '#/components/responses/BadRequest'
-        "401":
-          $ref: '#/components/responses/Unauthorized'
-        "403":
-          $ref: '#/components/responses/Forbidden'
-        "404":
-          $ref: '#/components/responses/NotFound'
-        "500":
-          $ref: '#/components/responses/InternalServerError'
-
-  /administrative-units:
-    get:
-      tags:
-        - AdministrativeUnits
-      summary: List administrative units
+        - HomeAdministrativeAreas
+      summary: List home administrative areas
       description: >
-        Returns the administrative units within the caller's scope: the units on which the
+        Returns the home administrative areas within the caller's scope: the units on which the
         caller holds any role and all units subordinate to them. Every role is inherited
         downwards along the administrative hierarchy.
-      operationId: listAdministrativeUnits
+      operationId: listHomeAdministrativeAreas
       responses:
         "200":
-          description: Successfully retrieved the list of administrative units.
+          description: Successfully retrieved the list of home administrative areas.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AdministrativeUnit'
+                  $ref: '#/components/schemas/HomeAdministrativeArea'
         "401":
           $ref: '#/components/responses/Unauthorized'
         "403":
@@ -105,16 +49,16 @@ paths:
         "500":
           $ref: '#/components/responses/InternalServerError'
 
-  /administrative-units/{id}:
+  /home-administrative-areas/{id}:
     get:
       tags:
-        - AdministrativeUnits
-      summary: Get administrative unit by ID
+        - HomeAdministrativeAreas
+      summary: Get home administrative area by ID
       description: >
-        Returns a single administrative unit by its unique identifier. The unit must lie within
+        Returns a single home administrative area by its unique identifier. The unit must lie within
         the caller's scope: a unit on which the caller holds any role, or one subordinate to such
         a unit. A unit outside the caller's scope is reported as not found.
-      operationId: getAdministrativeUnitById
+      operationId: getHomeAdministrativeAreaById
       parameters:
         - name: id
           in: path
@@ -123,11 +67,11 @@ paths:
             $ref: '#/components/schemas/Uuid'
       responses:
         "200":
-          description: Successfully retrieved the administrative unit.
+          description: Successfully retrieved the home administrative area.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AdministrativeUnit'
+                $ref: '#/components/schemas/HomeAdministrativeArea'
         "400":
           $ref: '#/components/responses/BadRequest'
         "401":
@@ -139,55 +83,26 @@ paths:
         "500":
           $ref: '#/components/responses/InternalServerError'
 
-  /administrative-units/apply-changeset:
-    post:
-      tags:
-        - AdministrativeUnits
-      summary: Applies a changeset to the administrative unit structure
-      description: Returns a single administrative unit by its unique identifier.
-      operationId: applyAdminUnitChangeset
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                file:
-                  type: string
-                  format: binary
-      responses:
-        "200":
-          description: Migration was successfully applied
-        "400":
-          $ref: '#/components/responses/BadRequest'
-        "401":
-          $ref: '#/components/responses/Unauthorized'
-        "403":
-          $ref: '#/components/responses/Forbidden'
-        "500":
-          $ref: '#/components/responses/InternalServerError'
-
-  /public-entities:
+  /outside-public-areas:
     get:
       tags:
-        - PublicEntities
-      summary: List public entities
+        - OutsidePublicAreas
+      summary: List outside public areas
       description: >
-        Returns the public entities within the caller's scope: the entities on which the caller
-        holds any role directly, and every entity belonging to an administrative unit on which
+        Returns the outside public areas within the caller's scope: the entities on which the caller
+        holds any role directly, and every entity belonging to a home administrative area on which
         the caller holds any role or which is subordinate to such a unit. Every role is inherited
         downwards along the administrative hierarchy.
-      operationId: listPublicEntities
+      operationId: listOutsidePublicAreas
       responses:
         "200":
-          description: Successfully retrieved the list of public entities.
+          description: Successfully retrieved the list of outside public areas.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PublicEntity'
+                  $ref: '#/components/schemas/OutsidePublicArea'
         "401":
           $ref: '#/components/responses/Unauthorized'
         "403":
@@ -197,33 +112,33 @@ paths:
 
     post:
       tags:
-        - PublicEntities
-      summary: Create a public entity
+        - OutsidePublicAreas
+      summary: Create an outside public area
       description: >
-        Creates a new public entity assigned to an administrative unit. Only a caller holding the
-        ADMIN role may create public entities, and only under an administrative unit within the
+        Creates a new outside public area assigned to a home administrative area. Only a caller holding the
+        ADMIN role may create outside public areas, and only under a home administrative area within the
         caller's Admin scope: a unit on which the caller holds ADMIN, or one subordinate to such
         a unit. A unit outside that scope is rejected as forbidden.
-      operationId: createPublicEntity
+      operationId: createOutsidePublicArea
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PublicEntityCreate'
+              $ref: '#/components/schemas/OutsidePublicAreaCreate'
       responses:
         "201":
-          description: The public entity was created.
+          description: The outside public area was created.
           headers:
             Location:
-              description: URI of the newly created public entity.
+              description: URI of the newly created outside public area.
               schema:
                 type: string
-                example: /api/v1/public-entities/3fa85f64-5717-4562-b3fc-2c963f66afa6
+                example: /api/v1/outside-public-areas/3fa85f64-5717-4562-b3fc-2c963f66afa6
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PublicEntity'
+                $ref: '#/components/schemas/OutsidePublicArea'
         "400":
           $ref: '#/components/responses/BadRequest'
         "401":
@@ -233,17 +148,17 @@ paths:
         "500":
           $ref: '#/components/responses/InternalServerError'
 
-  /public-entities/{id}:
+  /outside-public-areas/{id}:
     get:
       tags:
-        - PublicEntities
-      summary: Get public entity by ID
+        - OutsidePublicAreas
+      summary: Get outside public area by ID
       description: >
-        Returns a single public entity by its unique identifier. The entity must lie within the
+        Returns a single outside public area by its unique identifier. The entity must lie within the
         caller's scope: an entity on which the caller holds any role directly, or one belonging
-        to an administrative unit on which the caller holds any role or which is subordinate to
+        to a home administrative area on which the caller holds any role or which is subordinate to
         such a unit. An entity outside the caller's scope is reported as not found.
-      operationId: getPublicEntityById
+      operationId: getOutsidePublicAreaById
       parameters:
         - name: id
           in: path
@@ -252,11 +167,11 @@ paths:
             $ref: '#/components/schemas/Uuid'
       responses:
         "200":
-          description: Successfully retrieved the public entity.
+          description: Successfully retrieved the outside public area.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PublicEntity'
+                $ref: '#/components/schemas/OutsidePublicArea'
         "400":
           $ref: '#/components/responses/BadRequest'
         "401":
@@ -270,14 +185,14 @@ paths:
 
     patch:
       tags:
-        - PublicEntities
-      summary: Patch a public entity
+        - OutsidePublicAreas
+      summary: Patch an outside public area
       description: >
-        Partially updates a public entity. Only the supplied fields are changed. Only a caller
-        holding the ADMIN role may update public entities, and only those within the caller's
+        Partially updates an outside public area. Only the supplied fields are changed. Only a caller
+        holding the ADMIN role may update outside public areas, and only those within the caller's
         Admin scope; an entity outside that scope is reported as not found. Reassigning the entity
-        to an administrative unit outside the caller's Admin scope is rejected as forbidden.
-      operationId: patchPublicEntity
+        to a home administrative area outside the caller's Admin scope is rejected as forbidden.
+      operationId: patchOutsidePublicArea
       parameters:
         - name: id
           in: path
@@ -289,14 +204,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PublicEntityUpdate'
+              $ref: '#/components/schemas/OutsidePublicAreaUpdate'
       responses:
         "200":
-          description: The public entity was updated.
+          description: The outside public area was updated.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PublicEntity'
+                $ref: '#/components/schemas/OutsidePublicArea'
         "400":
           $ref: '#/components/responses/BadRequest'
         "401":
@@ -310,13 +225,13 @@ paths:
 
     delete:
       tags:
-        - PublicEntities
-      summary: Delete a public entity
+        - OutsidePublicAreas
+      summary: Delete an outside public area
       description: >
-        Deletes a public entity by its unique identifier. Only a caller holding the ADMIN role may
-        delete public entities, and only those within the caller's Admin scope; an entity outside
+        Deletes an outside public area by its unique identifier. Only a caller holding the ADMIN role may
+        delete outside public areas, and only those within the caller's Admin scope; an entity outside
         that scope is reported as not found.
-      operationId: deletePublicEntity
+      operationId: deleteOutsidePublicArea
       parameters:
         - name: id
           in: path
@@ -325,7 +240,7 @@ paths:
             $ref: '#/components/schemas/Uuid'
       responses:
         "204":
-          description: The public entity was deleted.
+          description: The outside public area was deleted.
         "400":
           $ref: '#/components/responses/BadRequest'
         "401":
@@ -515,13 +430,13 @@ paths:
         "500":
           $ref: '#/components/responses/InternalServerError'
 
-  # ESR building consumption entries of a public entity
-  /public-entities/{id}/esr/buildings:
+  # ESR building consumption entries of an outside public area
+  /outside-public-areas/{id}/esr/buildings:
     get:
       tags:
         - ESR
-        - PublicEntities
-      summary: Fetches the ESR entries for a public entity
+        - OutsidePublicAreas
+      summary: Fetches the ESR entries for an outside public area
       operationId: getBuildingEsrEntries
       parameters:
         - name: id
@@ -531,7 +446,7 @@ paths:
             $ref: '#/components/schemas/Uuid'
       responses:
         "200":
-          description: The list of ESR (building) entries for the public entity
+          description: The list of ESR (building) entries for the outside public area
           content:
             application/json:
               schema:
@@ -551,8 +466,8 @@ paths:
     post:
       tags:
         - ESR
-        - PublicEntities
-      summary: Create a new ESR (building) entry for the public entity
+        - OutsidePublicAreas
+      summary: Create a new ESR (building) entry for the outside public area
       operationId: createBuildingEsrEntry
       parameters:
         - name: id
@@ -585,18 +500,18 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
   # single building consumption entry
-  /public-entities/{publicEntityId}/esr/buildings/{id}:
+  /outside-public-areas/{outsidePublicAreaId}/esr/buildings/{id}:
     put:
       tags:
         - ESR
-        - PublicEntities
-      summary: Replace an ESR (building) entry for the public entity
+        - OutsidePublicAreas
+      summary: Replace an ESR (building) entry for the outside public area
       operationId: replaceBuildingEsrEntry
       parameters:
-        - name: publicEntityId
+        - name: outsidePublicAreaId
           in: path
           required: true
-          description: The public entity the entry belongs to
+          description: The outside public area the entry belongs to
           schema:
             $ref: '#/components/schemas/Uuid'
         - name: id
@@ -631,14 +546,14 @@ paths:
     delete:
       tags:
         - ESR
-        - PublicEntities
-      summary: Delete an ESR (building) entry for the public entity
+        - OutsidePublicAreas
+      summary: Delete an ESR (building) entry for the outside public area
       operationId: deleteBuildingEsrEntry
       parameters:
-        - name: publicEntityId
+        - name: outsidePublicAreaId
           in: path
           required: true
-          description: The public entity the entry belongs to
+          description: The outside public area the entry belongs to
           schema:
             $ref: '#/components/schemas/Uuid'
         - name: id
@@ -788,7 +703,7 @@ components:
       type: object
       required:
         - id
-        - publicEntity
+        - outsidePublicArea
         - category
         - consumption
         - start
@@ -796,8 +711,8 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/Uuid'
-        publicEntity:
-          $ref: '#/components/schemas/PublicEntityReference'
+        outsidePublicArea:
+          $ref: '#/components/schemas/OutsidePublicAreaReference'
         category:
           $ref: '#/components/schemas/BuildingConsumptionCategory'   # building consumption category (BWZK)
         consumption:
@@ -964,41 +879,16 @@ components:
         instance:
           type: string
           description: URI identifying the request that caused the error.
-          example: /api/v1/tasks/3fa85f64-5717-4562-b3fc-2c963f66afa6/status
+          example: /api/v1/outside-public-areas/3fa85f64-5717-4562-b3fc-2c963f66afa6
 
         traceId:
           type: string
           description: Correlation identifier for troubleshooting.
           example: 9b35d80dcbfd
 
-    Task:
+    HomeAdministrativeArea:
       type: object
-      description: A task tracked in the system.
-      required:
-        - id
-        - title
-        - status
-      properties:
-        id:
-          $ref: '#/components/schemas/Uuid'
-        title:
-          type: string
-          description: Title of the task.
-          example: Review energy readings for Q3
-        status:
-          $ref: '#/components/schemas/TaskStatus'
-
-    TaskStatus:
-      type: string
-      description: Status of the task.
-      enum:
-        - IN_PROGRESS
-        - EMPTY
-      example: IN_PROGRESS
-
-    AdministrativeUnit:
-      type: object
-      description: Represents an administrative unit (NUTS/LAU) in the system.
+      description: Represents a home administrative area in the system.
       required:
         - id
         - name
@@ -1006,36 +896,36 @@ components:
       properties:
         objectType:
           type: string
-          example: "NutsLau"
+          example: "HomeAdministrativeArea"
         id:
           $ref: '#/components/schemas/Uuid'
         name:
           type: string
-          description: Name of the administrative unit.
+          description: Name of the home administrative area.
           example: Berlin
         code:
           type: string
           maxLength: 16
-          description: NUTS or LAU code of the administrative unit.
-          example: DE2
+          description: Code of the home administrative area.
+          example: "HOME001"
         populationCount:
           type: integer
-          description: Population count of the administrative unit.
+          description: Population count of the home administrative area.
           example: 3685265
         levelType:
           type: integer
-          description: "Hierarchy level of the administrative unit: 1 = NUTS-1, 2 = NUTS-2, 3 = NUTS-3, 4 = LAU."
+          description: "Hierarchy level of the home administrative area: 1 = top level, each level below increases by one."
           example: 1
         parent:
-          $ref: '#/components/schemas/AdministrativeUnitReference'
+          $ref: '#/components/schemas/HomeAdministrativeAreaReference'
 
-    PublicEntity:
+    OutsidePublicArea:
       type: object
-      description: Represents a public entity belonging to an administrative unit.
+      description: Represents an outside public area belonging to a home administrative area.
       required:
         - id
         - name
-        - administrativeUnit
+        - homeAdministrativeArea
       properties:
         id:
           $ref: '#/components/schemas/Uuid'
@@ -1043,14 +933,14 @@ components:
           type: string
           minLength: 1
           maxLength: 256
-          description: Name of the public entity.
+          description: Name of the outside public area.
           example: Municipal swimming pool Mitte
-        administrativeUnit:
-          $ref: '#/components/schemas/AdministrativeUnitReference'
+        homeAdministrativeArea:
+          $ref: '#/components/schemas/HomeAdministrativeAreaReference'
 
-    AdministrativeUnitReference:
+    HomeAdministrativeAreaReference:
       type: object
-      description: Reduced representation of an administrative unit, used for parent references.
+      description: Reduced representation of a home administrative area, used for parent references.
       required:
         - id
         - name
@@ -1060,24 +950,24 @@ components:
           $ref: '#/components/schemas/Uuid'
         objectType:
           type: string
-          example: "NutsLau"
+          example: "HomeAdministrativeArea"
         name:
           type: string
-          description: Name of the administrative unit.
+          description: Name of the home administrative area.
           example: Berlin
         code:
           type: string
           maxLength: 16
-          description: NUTS or LAU code of the administrative unit.
-          example: DE2
+          description: Code of the home administrative area.
+          example: "HOME001"
         levelType:
           type: integer
-          description: "Hierarchy level of the administrative unit: 1 = NUTS-1, 2 = NUTS-2, 3 = NUTS-3, 4 = LAU."
+          description: "Hierarchy level of the home administrative area: 1 = top level, each level below increases by one."
           example: 1
 
-    PublicEntityReference:
+    OutsidePublicAreaReference:
       type: object
-      description: Reduced representation of a public entity, used for user assignments.
+      description: Reduced representation of an outside public area, used for user assignments.
       required:
         - id
         - name
@@ -1085,47 +975,47 @@ components:
       properties:
         objectType:
           type: string
-          example: "public-entity"
+          example: "outside-public-area"
         id:
           $ref: '#/components/schemas/Uuid'
         name:
           type: string
-          description: Name of the public entity.
+          description: Name of the outside public area.
           example: Municipal swimming pool Mitte
 
-    PublicEntityCreate:
+    OutsidePublicAreaCreate:
       type: object
-      description: Payload for creating a public entity.
+      description: Payload for creating an outside public area.
       required:
         - name
-        - administrativeUnitId
+        - homeAdministrativeAreaId
       properties:
         name:
           type: string
           minLength: 1
           maxLength: 256
-          description: Name of the public entity.
+          description: Name of the outside public area.
           example: Municipal swimming pool Mitte
-        administrativeUnitId:
+        homeAdministrativeAreaId:
           allOf:
             - $ref: '#/components/schemas/Uuid'
-          description: Identifier of the administrative unit the public entity belongs to.
+          description: Identifier of the home administrative area the outside public area belongs to.
 
-    PublicEntityUpdate:
+    OutsidePublicAreaUpdate:
       type: object
-      description: Payload for partially updating a public entity. At least one field must be supplied.
+      description: Payload for partially updating an outside public area. At least one field must be supplied.
       minProperties: 1
       properties:
         name:
           type: string
           minLength: 1
           maxLength: 256
-          description: New name of the public entity.
+          description: New name of the outside public area.
           example: Municipal swimming pool Mitte
-        administrativeUnitId:
+        homeAdministrativeAreaId:
           allOf:
             - $ref: '#/components/schemas/Uuid'
-          description: Identifier of the administrative unit the public entity is reassigned to.
+          description: Identifier of the home administrative area the outside public area is reassigned to.
 
     User:
       type: object
@@ -1191,7 +1081,7 @@ components:
     UserRole:
       type: object
       description: >
-        A role of a user within a scope (administrative unit or public entity). The role is
+        A role of a user within a scope (home administrative area or outside public area). The role is
         inherited downwards: it applies to the scope itself and to every unit below it.
       required:
         - id
@@ -1208,47 +1098,47 @@ components:
     UserRoleCreate:
       type: object
       description: >
-        Payload for assigning a role to a user on an administrative unit or a public entity.
+        Payload for assigning a role to a user on a home administrative area or an outside public area.
         The role also applies to everything below that unit in the administrative hierarchy.
       required:
         - role
       properties:
         role:
           $ref: '#/components/schemas/Role'
-        administrativeUnitId:
+        homeAdministrativeAreaId:
           allOf:
             - $ref: '#/components/schemas/Uuid'
-          description: Identifier of the administrative unit the role applies to.
-        publicEntityId:
+          description: Identifier of the home administrative area the role applies to.
+        outsidePublicAreaId:
           allOf:
             - $ref: '#/components/schemas/Uuid'
-          description: Identifier of the public entity the role applies to.
+          description: Identifier of the outside public area the role applies to.
       oneOf:
-        - required: [ administrativeUnitId ]
+        - required: [ homeAdministrativeAreaId ]
           not:
-            required: [ publicEntityId ]
-        - required: [ publicEntityId ]
+            required: [ outsidePublicAreaId ]
+        - required: [ outsidePublicAreaId ]
           not:
-            required: [ administrativeUnitId ]
+            required: [ homeAdministrativeAreaId ]
 
     AssignmentReference:
       type: object
       description: The organisational unit the user is assigned to.
       oneOf:
-        - $ref: '#/components/schemas/AdministrativeUnitReference'
-        - $ref: '#/components/schemas/PublicEntityReference'
+        - $ref: '#/components/schemas/HomeAdministrativeAreaReference'
+        - $ref: '#/components/schemas/OutsidePublicAreaReference'
       discriminator:
         propertyName: objectType
         mapping:
-          administrativeUnitReference: '#/components/schemas/AdministrativeUnitReference'
-          publicEntityReference: '#/components/schemas/PublicEntityReference'
+          homeAdministrativeAreaReference: '#/components/schemas/HomeAdministrativeAreaReference'
+          outsidePublicAreaReference: '#/components/schemas/OutsidePublicAreaReference'
 
     AssignmentType:
       type: string
       description: Discriminator for the organisational unit a user is assigned to.
       enum:
-        - administrativeUnitReference
-        - publicEntityReference
+        - homeAdministrativeAreaReference
+        - outsidePublicAreaReference
 
     UserCreate:
       type: object
@@ -1274,26 +1164,26 @@ components:
           minLength: 3
           maxLength: 254
           example: luka.mayr@home.de
-        administrativeUnitId:
+        homeAdministrativeAreaId:
           allOf:
             - $ref: '#/components/schemas/Uuid'
-          description: Identifier of the administrative unit the user belongs to.
-        publicEntityId:
+          description: Identifier of the home administrative area the user belongs to.
+        outsidePublicAreaId:
           allOf:
             - $ref: '#/components/schemas/Uuid'
-          description: Identifier of the public entity the user belongs to.
+          description: Identifier of the outside public area the user belongs to.
         roles:
           type: array
           description: Initial roles. Every unit must lie within the calling Admin's scope.
           items:
             $ref: '#/components/schemas/UserRoleCreate'
       oneOf:
-        - required: [ administrativeUnitId ]
+        - required: [ homeAdministrativeAreaId ]
           not:
-            required: [ publicEntityId ]
-        - required: [ publicEntityId ]
+            required: [ outsidePublicAreaId ]
+        - required: [ outsidePublicAreaId ]
           not:
-            required: [ administrativeUnitId ]
+            required: [ homeAdministrativeAreaId ]
 
     UserUpdate:
       type: object
@@ -1316,14 +1206,14 @@ components:
           minLength: 3
           maxLength: 254
           example: luka.mayr@home.de
-        administrativeUnitId:
+        homeAdministrativeAreaId:
           allOf:
             - $ref: '#/components/schemas/Uuid'
-          description: Identifier of the administrative unit the user is reassigned to.
-        publicEntityId:
+          description: Identifier of the home administrative area the user is reassigned to.
+        outsidePublicAreaId:
           allOf:
             - $ref: '#/components/schemas/Uuid'
-          description: Identifier of the public entity the user is reassigned to.
+          description: Identifier of the outside public area the user is reassigned to.
         roles:
           type: array
           description: >
@@ -1337,7 +1227,7 @@ components:
             $ref: '#/components/schemas/UserRoleCreate'
       # At most one of the two: a patch may carry neither, for example when only roles change.
       not:
-        required: [ administrativeUnitId, publicEntityId ]
+        required: [ homeAdministrativeAreaId, outsidePublicAreaId ]
 
     Uuid:
       type: string
@@ -1361,7 +1251,7 @@ components:
                 detail: The supplied identifier is not a valid UUID.
                 code: VALIDATION_001
                 timestamp: "2026-07-16T14:20:11Z"
-                instance: /api/v1/tasks/not-a-uuid/status
+                instance: /api/v1/outside-public-areas/not-a-uuid
                 traceId: 9b35d80dcbfd
             missingRequiredField:
               summary: Required field missing (bean validation)
@@ -1376,13 +1266,13 @@ components:
                 status: 400
                 code: INVALID_FIELD_FORMAT
             duplicateNameInParent:
-              summary: Name already used within the same administrative unit
+              summary: Name already used within the same home administrative area
               value:
                 title: Conflict
                 status: 400
                 code: DUPLICATE_NAME_IN_PARENT
             invalidParent:
-              summary: Referenced administrative unit does not exist
+              summary: Referenced home administrative area does not exist
               value:
                 title: Invalid reference
                 status: 400
@@ -1403,10 +1293,10 @@ components:
                 detail: No resource exists with the given id.
                 code: RESOURCE_001
                 timestamp: "2026-07-16T14:20:11Z"
-                instance: /api/v1/tasks/3fa85f64-5717-4562-b3fc-2c963f66afa6/status
+                instance: /api/v1/outside-public-areas/3fa85f64-5717-4562-b3fc-2c963f66afa6
                 traceId: 9b35d80dcbfd
             entityNotFound:
-              summary: Public entity not found
+              summary: Outside public area not found
               value:
                 title: Entity not found
                 status: 404
@@ -1425,8 +1315,8 @@ components:
                 title: Conflict
                 status: 409
                 detail: >
-                  This is the last active Admin of the assigned administrative unit
-                  or public entity. Repeat the request with confirmed=true to confirm.
+                  This is the last active Admin of the assigned home administrative area
+                  or outside public area. Repeat the request with confirmed=true to confirm.
                 code: LAST_ADMIN_CONFIRMATION_REQUIRED
 
     InternalServerError:
@@ -1444,7 +1334,7 @@ components:
                 detail: An unexpected error occurred while processing the request.
                 code: SYS_001
                 timestamp: "2026-07-16T14:20:11Z"
-                instance: /api/v1/tasks/3fa85f64-5717-4562-b3fc-2c963f66afa6/status
+                instance: /api/v1/outside-public-areas/3fa85f64-5717-4562-b3fc-2c963f66afa6
                 traceId: 9b35d80dcbfd
 
     Unauthorized:
@@ -1462,7 +1352,7 @@ components:
                 detail: Authentication is required to access this resource.
                 code: AUTH_001
                 timestamp: "2026-07-16T14:20:11Z"
-                instance: /api/v1/tasks/3fa85f64-5717-4562-b3fc-2c963f66afa6/status
+                instance: /api/v1/outside-public-areas/3fa85f64-5717-4562-b3fc-2c963f66afa6
                 traceId: 9b35d80dcbfd
 
     Forbidden:
@@ -1480,5 +1370,5 @@ components:
                 detail: You do not have the required permission for this operation.
                 code: AUTH_002
                 timestamp: "2026-07-16T14:20:11Z"
-                instance: /api/v1/tasks/3fa85f64-5717-4562-b3fc-2c963f66afa6/status
+                instance: /api/v1/outside-public-areas/3fa85f64-5717-4562-b3fc-2c963f66afa6
                 traceId: 9b35d80dcbfd

@@ -39,8 +39,15 @@ spring:
     password: password
   jpa:
     show-sql: true
+    open-in-view: false
     properties:
-      org.hibernate.envers.global_with_modified_flag: true
+      # Modified flags would require a <column>_mod boolean per audited property in every *_aud
+      # table; the migrations (007, 008) follow the plain Envers layout instead.
+      org.hibernate.envers.global_with_modified_flag: false
+      org.hibernate.envers.audit_table_suffix: _aud
+      # A DEL revision keeps the deleted row's columns; otherwise only the id is recorded and the
+      # audit could not say which role on which unit was revoked.
+      org.hibernate.envers.store_data_at_delete: true
       hibernate:
         envers:
           autoRegisterListeners: true
@@ -109,6 +116,13 @@ app:
       user-actions: energyregistry.user-actions.v1
   energy:
     threshold: 1000
+  keycloak:
+    # Admin API access for KeycloakUserService (client with service account + manage-users role)
+    server-url: ${KEYCLOAK_SERVER_URL:http://localhost:9090}
+    realm: ${KEYCLOAK_REALM:energyregistry-realm}
+    admin-client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:energyregistry-admin}
+    admin-client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:change-me}
+    initial-password: ${KEYCLOAK_INITIAL_PASSWORD:ChangeMe123!}
   minio:
     endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
     access-key: ${MINIO_ACCESS_KEY:minioadmin}
