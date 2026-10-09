@@ -1,63 +1,257 @@
+# HomeEnergyRegistryApp - manual requests for the IntelliJ HTTP client.
+#
+# Flow: 1) get a token (Auth section) - the response handler stores access_token / refresh_token,
+#       2) call the API; ids returned by "create" requests are stored and reused by the next requests.
+# Secrets (password, one-time code, OTP) are placeholders - fill them locally, never commit real values.
+
 @keycloak = http://localhost:9090
-@realm = energyregistry-realm
-@client_id = energyregistry-app
+@realm = homeenergyregistry-realm
+@client_id = homeenergyregistry-app
 @redirect_uri = http://localhost:8081/callback
-@code = 53b09224-c9f9-4f6c-bdec-960a218a9823.6f8509fa-f27c-4795-939e-4575ef0b70a4.52d8fd3f-45b4-46a1-b684-7dbd53506721
+@app = http://localhost:8080
+@api = {{app}}/api/v1
+
 @username = testuser
-@password = testpass
-@refresh_token = eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI4N2UzZmQ0Ny03NTY3LTQ0MjMtODQ3Yy1kY2RkMDkyYzg0MGUifQ.eyJleHAiOjE3ODI0ODE0MzAsImlhdCI6MTc4MjQ3OTYzMCwianRpIjoiN2VlZWIwMjQtZmJlZi1lM2QyLWU0NzQtOTcwYmFiMWRjYmU5IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo5MDkwL3JlYWxtcy9kZW5hLXJlYWxtIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo5MDkwL3JlYWxtcy9kZW5hLXJlYWxtIiwic3ViIjoiYWQ2ZDYwOWEtYTUxMi00Y2IyLWJjNWQtOTcwMjRhMWFlNWQ3IiwidHlwIjoiUmVmcmVzaCIsImF6cCI6ImRlbmEtYXBwIiwic2lkIjoiNmY4NTA5ZmEtZjI3Yy00Nzk1LTkzOWUtNDU3NWVmMGI3MGE0Iiwic2NvcGUiOiJvcGVuaWQgZW1haWwgYmFzaWMgcm9sZXMgYWNyIHdlYi1vcmlnaW5zIHByb2ZpbGUifQ.wuG-zN4EXnD31TJ7Loc1ByHOzrMi7B0Db5bE0gvTW5hBCUpmYBVfqHIFrEV370UEtcKUlYCMUsZkKx_R5TG0Ww
-@access_token = eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJQMWxkTkdmY3pFYXNwS2ZyenZFODZMc2hJVzNIZUJCaWloZ0VrVUFzSEo0In0.eyJleHAiOjE3ODI0Nzk5MzAsImlhdCI6MTc4MjQ3OTYzMCwiYXV0aF90aW1lIjoxNzgyNDc5NjAyLCJqdGkiOiJvbnJ0YWM6NTgxZjUxYmMtYTZhNy03Yjk0LTc5MjItYTUyYzY0ZDlkNTljIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo5MDkwL3JlYWxtcy9kZW5hLXJlYWxtIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6ImFkNmQ2MDlhLWE1MTItNGNiMi1iYzVkLTk3MDI0YTFhZTVkNyIsInR5cCI6IkJlYXJlciIsImF6cCI6ImRlbmEtYXBwIiwic2lkIjoiNmY4NTA5ZmEtZjI3Yy00Nzk1LTkzOWUtNDU3NWVmMGI3MGE0IiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vbG9jYWxob3N0OjgwODEvKiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsiZGVmYXVsdC1yb2xlcy1kZW5hLXJlYWxtIiwib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImRlbmEtYXBwIjp7InJvbGVzIjpbInVzZXIiXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6IlZpdGFsaWkgRHVkb2siLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJ0ZXN0dXNlciIsImdpdmVuX25hbWUiOiJWaXRhbGlpIiwiZmFtaWx5X25hbWUiOiJEdWRvayIsImVtYWlsIjoidml0YWxpay5kdWRva0BnbWFpbC5jb20ifQ.arGP21ZqFQoq7POFLLM7w1COcFJcILuHxVbffS24HV6x9HLjGe55GEMfQxYSyzXfzRJg7kSWkylSqJTYLAm1K7ifCpn4fwZ3FnaDgUiV3Geo1Qfvmhu5lBiAFgwRAiITErwMSl5l8IbuqIxzWF8djC7_heQIE0s5Im8t5aRVM1gEsc2zv9f_iQxAqy7S59BHS-C5s1fBHZu3buFXknS8JqGB3vukIeTSwVEr9FYFTdFyOpsGrrloFI4pLG024HQn-43iIYQL0KrhidvgedBTaQP_aqPewdT4gg541rmkhaMkPlcUGLAW9KaonbB2VqO7SojA9zMrPaipwosrjGql8g
-@otp = 742455
+@password = <password>
+@code = <one-time code from the login redirect>
+@otp = <current OTP>
 
-### Login link to get the one-time authorization code
-GET http://localhost:9090/realms/energyregistry-realm/protocol/openid-connect/auth?client_id=energyregistry-app&response_type=code&
-    scope=openid%20profile%20email&redirect_uri=http://localhost:8081/callback&prompt=login
+# Existing master data to start from (replace with ids from your database)
+@homeAdministrativeAreaId = 00000000-0000-0000-0000-000000000000
+@energyCarrierId = 00000000-0000-0000-0000-000000000000
+@categoryId = 00000000-0000-0000-0000-000000000000
 
-### Logout
-GET http://localhost:9090/realms/energyregistry-realm/protocol/openid-connect/logout
 
-### GET token with MFA
-POST http://localhost:9090/realms/energyregistry-realm/protocol/openid-connect/token
+######################################################################
+# Auth (Keycloak)
+######################################################################
+
+### Login link - open in a browser, copy the "code" parameter from the redirect into @code
+GET {{keycloak}}/realms/{{realm}}/protocol/openid-connect/auth?client_id={{client_id}}&response_type=code&scope=openid%20profile%20email&redirect_uri={{redirect_uri}}&prompt=login
+
+### Token - authorization code (with MFA done in the browser)
+POST {{keycloak}}/realms/{{realm}}/protocol/openid-connect/token
 Content-Type: application/x-www-form-urlencoded
 
-grant_type = authorization_code &
-client_id = {{client_id}} &
-redirect_uri = {{redirect_uri}} &
-code = {{code}}
+grant_type=authorization_code&client_id={{client_id}}&redirect_uri={{redirect_uri}}&code={{code}}
 
-<> 2026-06-26T161350.200.json
+> {%
+    client.global.set("access_token", response.body.access_token);
+    client.global.set("refresh_token", response.body.refresh_token);
+%}
 
-### GET token with Direct grant
-POST http://localhost:9090/realms/energyregistry-realm/protocol/openid-connect/token
+### Token - direct grant (username + password + OTP)
+POST {{keycloak}}/realms/{{realm}}/protocol/openid-connect/token
 Content-Type: application/x-www-form-urlencoded
 
-grant_type = password &
-client_id = {{client_id}} &
-username = {{username}} &
-password = {{password}} &
-totp = {{otp}}
+grant_type=password&client_id={{client_id}}&username={{username}}&password={{password}}&totp={{otp}}
 
-<> 2026-06-26T162141.200.json
+> {%
+    client.global.set("access_token", response.body.access_token);
+    client.global.set("refresh_token", response.body.refresh_token);
+%}
+
+### Token - refresh
+POST {{keycloak}}/realms/{{realm}}/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=refresh_token&client_id={{client_id}}&refresh_token={{refresh_token}}
+
+> {%
+    client.global.set("access_token", response.body.access_token);
+    client.global.set("refresh_token", response.body.refresh_token);
+%}
+
+### Logout - ends the Keycloak session of the stored refresh token
+POST {{keycloak}}/realms/{{realm}}/protocol/openid-connect/logout
+Content-Type: application/x-www-form-urlencoded
+
+client_id={{client_id}}&refresh_token={{refresh_token}}
 
 
-###
-GET http://localhost:8080/user/hello
+######################################################################
+# Home administrative areas
+######################################################################
+
+### List home administrative areas in scope
+GET {{api}}/home-administrative-areas
 Authorization: Bearer {{access_token}}
 
-<> 2026-06-26T161751.200.txt
-<> 2026-06-25T011146.200.txt
-<> 2026-06-25T011144.200.txt
-<> 2026-06-25T011059.200.txt
-<> 2026-06-25T010557.200.txt
-<> 2026-06-25T010555.200.txt
-<> 2026-06-25T010107.200.txt
-<> 2026-06-25T010105.200.txt
-<> 2026-06-25T005542.200.txt
+### Get home administrative area by id
+GET {{api}}/home-administrative-areas/{{homeAdministrativeAreaId}}
+Authorization: Bearer {{access_token}}
 
-###
-GET http://localhost:8080/public/hello
 
-<> 2026-06-26T161755.200.txt
-<> 2026-06-25T005711.200.txt
-<> 2026-06-25T005504.200.txt
-<> 2026-06-25T005441.200.txt
+######################################################################
+# Outside public areas
+######################################################################
+
+### List outside public areas in scope
+GET {{api}}/outside-public-areas
+Authorization: Bearer {{access_token}}
+
+### Create outside public area (ADMIN)
+POST {{api}}/outside-public-areas
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "name": "Municipal swimming pool",
+  "homeAdministrativeAreaId": "{{homeAdministrativeAreaId}}"
+}
+
+> {% client.global.set("outsidePublicAreaId", response.body.id); %}
+
+### Get outside public area by id
+GET {{api}}/outside-public-areas/{{outsidePublicAreaId}}
+Authorization: Bearer {{access_token}}
+
+### Patch outside public area (ADMIN)
+PATCH {{api}}/outside-public-areas/{{outsidePublicAreaId}}
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "name": "Municipal swimming pool (renamed)"
+}
+
+### Delete outside public area (ADMIN)
+DELETE {{api}}/outside-public-areas/{{outsidePublicAreaId}}
+Authorization: Bearer {{access_token}}
+
+
+######################################################################
+# Users (ADMIN)
+######################################################################
+
+### List users in scope
+GET {{api}}/users
+Authorization: Bearer {{access_token}}
+
+### Create user with an ESR editor role on the outside public area
+POST {{api}}/users
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "firstName": "Test",
+  "lastName": "User",
+  "email": "test.user@example.com",
+  "outsidePublicAreaId": "{{outsidePublicAreaId}}",
+  "roles": [
+    { "role": "ESR_EDITOR", "outsidePublicAreaId": "{{outsidePublicAreaId}}" }
+  ]
+}
+
+> {% client.global.set("userId", response.body.id); %}
+
+### Get user by id
+GET {{api}}/users/{{userId}}
+Authorization: Bearer {{access_token}}
+
+### Patch user - roles: absent = unchanged, [] = remove all in scope, list = exactly these
+PATCH {{api}}/users/{{userId}}
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "lastName": "User-Updated",
+  "roles": [
+    { "role": "ESR_VIEWER", "outsidePublicAreaId": "{{outsidePublicAreaId}}" }
+  ]
+}
+
+### Deactivate user (409 LAST_ADMIN_CONFIRMATION_REQUIRED -> repeat with confirmed=true)
+DELETE {{api}}/users/{{userId}}?confirmed=false
+Authorization: Bearer {{access_token}}
+
+
+######################################################################
+# ESR - Energy Supply Register
+######################################################################
+
+### Building consumption categories (master data)
+GET {{api}}/esr/buildings/categories
+Authorization: Bearer {{access_token}}
+
+### Energy carrier units (master data)
+GET {{api}}/esr/energy-carriers/units
+Authorization: Bearer {{access_token}}
+
+### List ESR building entries of the outside public area
+GET {{api}}/outside-public-areas/{{outsidePublicAreaId}}/esr/buildings
+Authorization: Bearer {{access_token}}
+
+### Create building consumption (not heat-only)
+POST {{api}}/outside-public-areas/{{outsidePublicAreaId}}/esr/buildings
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "objectType": "BuildingConsumption",
+  "carrier": "{{energyCarrierId}}",
+  "category": "{{categoryId}}",
+  "quantity": "1250.5",
+  "start": "2026-01-01",
+  "end": "2026-12-31"
+}
+
+> {% client.global.set("esrEntryId", response.body.id); %}
+
+### Create heat building consumption (heat-only, weather-adjusted flag required)
+POST {{api}}/outside-public-areas/{{outsidePublicAreaId}}/esr/buildings
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "objectType": "HeatBuildingConsumption",
+  "carrier": "{{energyCarrierId}}",
+  "category": "{{categoryId}}",
+  "quantity": "8400",
+  "start": "2026-01-01",
+  "end": "2026-12-31",
+  "isWeatherAdjusted": true
+}
+
+### Replace ESR entry (the type cannot change)
+PUT {{api}}/outside-public-areas/{{outsidePublicAreaId}}/esr/buildings/{{esrEntryId}}
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "objectType": "BuildingConsumption",
+  "carrier": "{{energyCarrierId}}",
+  "category": "{{categoryId}}",
+  "quantity": "1300",
+  "start": "2026-01-01",
+  "end": "2026-12-31"
+}
+
+### Delete ESR entry
+DELETE {{api}}/outside-public-areas/{{outsidePublicAreaId}}/esr/buildings/{{esrEntryId}}
+Authorization: Bearer {{access_token}}
+
+
+######################################################################
+# Energy CSV import (outside the OpenAPI contract)
+######################################################################
+
+### Upload meter readings CSV
+POST {{app}}/energy/upload
+Authorization: Bearer {{access_token}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="files"; filename="meter-a.csv"
+Content-Type: text/csv
+
+< ./src/test/resources/testfiles/meter-a.csv
+--boundary--
+
+
+######################################################################
+# Operations
+######################################################################
+
+### Health
+GET {{app}}/actuator/health
