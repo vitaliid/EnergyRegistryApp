@@ -90,12 +90,13 @@ class EnergyCsvUploadServiceTest {
         EnergyUploadResponse response = service.processFiles(List.of(file));
 
         assertThat(response.filesProcessed()).isEqualTo(1);
-        assertThat(response.readingsProcessed()).isEqualTo(2);
+        // meter-a.csv: 850, 920, 980
+        assertThat(response.readingsProcessed()).isEqualTo(3);
         assertThat(response.readings())
                 .extracting(EnergyReadingResponse::meterId)
                 .containsOnly("meter-a");
 
-        verify(energyRegistryService, times(2)).registerReading(any(EnergyReadingRequest.class));
+        verify(energyRegistryService, times(3)).registerReading(any(EnergyReadingRequest.class));
         verify(objectStorageService).upload(file);
 
         verify(userActionPublisher).success(
@@ -107,7 +108,7 @@ class EnergyCsvUploadServiceTest {
         verify(userActionPublisher, never()).failure(any(), anyString(), any(), anyString());
 
         assertThat(metadataCaptor.getValue())
-                .containsEntry("readingsProcessed", 2)
+                .containsEntry("readingsProcessed", 3)
                 .containsEntry("objectKey", "2026/10/06/meter-a.csv")
                 .containsKey("size");
     }
@@ -124,11 +125,13 @@ class EnergyCsvUploadServiceTest {
         EnergyUploadResponse response = service.processFiles(files);
 
         assertThat(response.filesProcessed()).isEqualTo(3);
-        assertThat(response.readingsProcessed()).isEqualTo(6);
+        // 3 (meter-a) + 3 (meter-b-threshold) + 5 (mixed-meters)
+        assertThat(response.readingsProcessed()).isEqualTo(11);
+        // strictly above 1000: meter-b 1001 and 1250, meter-4 1000.5, meter-5 1400 (meter-3 at exactly 1000 is not)
         assertThat(response.readings())
                 .filteredOn(EnergyReadingResponse::aboveThreshold)
                 .extracting(EnergyReadingResponse::meterId)
-                .containsExactly("meter-b");   // only meter-b,1001 exceeds the 1000 threshold
+                .containsExactly("meter-b", "meter-b", "meter-4", "meter-5");
 
         verify(userActionPublisher, times(3)).success(
                 eq(UserActionType.ENERGY_CSV_IMPORTED),
