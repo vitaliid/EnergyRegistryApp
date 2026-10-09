@@ -16,7 +16,7 @@ public class UserActionKafkaConsumer {
 
     @KafkaListener(
             topics = "${app.kafka.topics.user-actions}",
-            groupId = "energyregistry-user-action-log-writer"
+            groupId = "homeenergyregistry-user-action-log-writer"
     )
     @Transactional(transactionManager = "transactionManager")
     public void consume(UserActionEvent event) {

@@ -12,7 +12,7 @@ logging:
 isy:
   logging:
     anwendung:
-      name: EnergyRegistryApp
+      name: HomeEnergyRegistryApp
       typ: backend
       version: 1.0.0
 
@@ -26,7 +26,7 @@ management:
       show-details: always
   metrics:
     tags:
-      application: energyregistry-app
+      application: homeenergyregistry-app
   prometheus:
     metrics:
       export:
@@ -34,7 +34,7 @@ management:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/energyregistry
+    url: jdbc:postgresql://localhost:5432/homeenergyregistry
     username: postgres
     password: password
   jpa:
@@ -77,8 +77,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:9090/realms/energyregistry-realm
-          jwk-set-uri: http://localhost:9090/realms/energyregistry-realm/protocol/openid-connect/certs
+          issuer-uri: http://localhost:9090/realms/homeenergyregistry-realm
+          jwk-set-uri: http://localhost:9090/realms/homeenergyregistry-realm/protocol/openid-connect/certs
   servlet:
     multipart:
       enabled: true
@@ -89,17 +89,17 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      transaction-id-prefix: energyregistry-user-action-${HOSTNAME:local}-
+      transaction-id-prefix: homeenergyregistry-user-action-${HOSTNAME:local}-
       properties:
         spring.json.add.type.headers: false
     consumer:
-      group-id: energyregistry-user-action-log-writer
+      group-id: homeenergyregistry-user-action-log-writer
       enable-auto-commit: false
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: org.example
-        spring.json.value.default.type: org.example.domain.logging.UserActionEvent
+        spring.json.value.default.type: org.example.domain.UserActionEvent
     listener:
       ack-mode: record
 
@@ -113,18 +113,18 @@ springdoc:
 app:
   kafka:
     topics:
-      user-actions: energyregistry.user-actions.v1
+      user-actions: homeenergyregistry.user-actions.v1
   energy:
     threshold: 1000
   keycloak:
     # Admin API access for KeycloakUserService (client with service account + manage-users role)
     server-url: ${KEYCLOAK_SERVER_URL:http://localhost:9090}
-    realm: ${KEYCLOAK_REALM:energyregistry-realm}
-    admin-client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:energyregistry-admin}
+    realm: ${KEYCLOAK_REALM:homeenergyregistry-realm}
+    admin-client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:homeenergyregistry-admin}
     admin-client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:change-me}
     initial-password: ${KEYCLOAK_INITIAL_PASSWORD:ChangeMe123!}
   minio:
     endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
     access-key: ${MINIO_ACCESS_KEY:minioadmin}
     secret-key: ${MINIO_SECRET_KEY:minioadmin}
-    bucket: energyregistry-energy-uploads
+    bucket: homeenergyregistry-energy-uploads

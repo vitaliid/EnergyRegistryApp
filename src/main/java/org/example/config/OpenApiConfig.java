@@ -11,8 +11,8 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("ER API")
+                        .title("Home Energy Registry API")
                         .version("1.0.0")
-                        .description("Energy Register API"));
+                        .description("Home Energy Registry API"));
     }
 }

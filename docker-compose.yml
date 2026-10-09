@@ -1,16 +1,16 @@
 services:
-  postgres-energyregistry:
+  postgres-homeenergyregistry:
     image: postgres:16
-    container_name: postgres-energyregistry
+    container_name: postgres-homeenergyregistry
     restart: unless-stopped
     environment:
-      POSTGRES_DB: energyregistry
+      POSTGRES_DB: homeenergyregistry
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
     volumes:
-      - postgres_energyregistry_data:/var/lib/postgresql/data
+      - postgres_homeenergyregistry_data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
@@ -60,7 +60,7 @@ services:
 
   prometheus:
     image: prom/prometheus:v2.55.1
-    container_name: energyregistry-prometheus
+    container_name: homeenergyregistry-prometheus
     ports:
       - "9090:9090"
     depends_on:
@@ -78,7 +78,7 @@ services:
 
   alertmanager:
     image: prom/alertmanager:v0.27.0
-    container_name: energyregistry-alertmanager
+    container_name: homeenergyregistry-alertmanager
     ports:
       - "9093:9093"
     volumes:
@@ -86,9 +86,9 @@ services:
     command:
       - "--config.file=/etc/alertmanager/alertmanager.yml"
 
-  kafka-energyregistry:
+  kafka-homeenergyregistry:
     image: apache/kafka:4.0.2
-    container_name: energyregistry-kafka
+    container_name: homeenergyregistry-kafka
     ports:
       - "9092:9092"
     environment:
@@ -111,9 +111,9 @@ services:
     volumes:
       - kafka-data:/tmp/kraft-combined-logs
 
-  minio-energyregistry:
+  minio-homeenergyregistry:
     image: minio/minio:RELEASE.2025-09-07T16-13-09Z
-    container_name: energyregistry-minio
+    container_name: homeenergyregistry-minio
     command: server /data --console-address ":9001"
     ports:
       - "9000:9000" # S3 API endpoint used by your Spring Boot app
@@ -128,14 +128,14 @@ services:
 
   graylog-mongodb:
     image: mongo:7.0
-    container_name: energyregistry-graylog-mongodb
+    container_name: homeenergyregistry-graylog-mongodb
     volumes:
       - graylog-mongo-data:/data/db
     restart: unless-stopped
 
   graylog-opensearch:
     image: opensearchproject/opensearch:2.15.0
-    container_name: energyregistry-graylog-opensearch
+    container_name: homeenergyregistry-graylog-opensearch
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
       - "bootstrap.memory_lock=true"
@@ -155,7 +155,7 @@ services:
 
   graylog:
     image: graylog/graylog:7.1
-    container_name: energyregistry-graylog
+    container_name: homeenergyregistry-graylog
     environment:
       - GRAYLOG_PASSWORD_SECRET=somepasswordpepper12345678901234
       - GRAYLOG_ROOT_PASSWORD_SHA2=8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
@@ -177,7 +177,7 @@ services:
 
 
 volumes:
-  postgres_energyregistry_data:
+  postgres_homeenergyregistry_data:
   postgres_keycloak_data:
   prometheus-data:
   kafka-data:
