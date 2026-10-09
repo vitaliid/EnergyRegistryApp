@@ -1,6 +1,8 @@
 package org.example.service;
 
 import org.example.exception.BusinessException;
+import org.example.validation.Din91379TextValidation;
+import org.example.validation.Din91379Type;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -10,17 +12,17 @@ import java.text.Normalizer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class Din91379TextServiceTest {
+class Din91379TextValidationTest {
 
     // Both strings render as "é", but they differ in code points.
     private static final String E_DECOMPOSED = "é";   // 2 code points: e + combining acute
     private static final String E_COMPOSED = "é";      // 1 code point: é (NFC)
 
-    private Din91379TextService service;
+    private Din91379TextValidation service;
 
     @BeforeEach
     void setUp() {
-        service = new Din91379TextService();
+        service = new Din91379TextValidation();
         service.init();
     }
 
@@ -43,7 +45,7 @@ class Din91379TextServiceTest {
         assertFalse(Normalizer.isNormalized(decomposed, Normalizer.Form.NFC));
         assertNotEquals(composed, decomposed);
 
-        String normalizedResult = service.normalize(decomposed);
+        String normalizedResult = service.normalizeAndValidate(decomposed, Din91379Type.DATATYPE_C);
 
         assertTrue(Normalizer.isNormalized(normalizedResult, Normalizer.Form.NFC));
         assertEquals(1, normalizedResult.codePointCount(0, normalizedResult.length()));
@@ -52,12 +54,12 @@ class Din91379TextServiceTest {
 
     @Test
     void normalizeKeepsNull() {
-        assertNull(service.normalize(null));
+        assertNull(service.normalizeAndValidate(null, Din91379Type.DATATYPE_C));
     }
 
     @Test
     void normalizesAlreadyComposedTextUnchanged() {
-        assertEquals(E_COMPOSED, service.normalize(E_COMPOSED));
+        assertEquals(E_COMPOSED, service.normalizeAndValidate(E_COMPOSED, Din91379Type.DATATYPE_C));
     }
 
     @Test
@@ -65,7 +67,7 @@ class Din91379TextServiceTest {
         String input = "Caf" + E_DECOMPOSED + " Müller";   // NFD: e+◌́ and u+◌̈
         assertFalse(Normalizer.isNormalized(input, Normalizer.Form.NFC));
 
-        String result = service.normalizeAndValidate(input);
+        String result = service.normalizeAndValidate(input, Din91379Type.DATATYPE_C);
 
         assertEquals("Café Müller", result);
         assertTrue(Normalizer.isNormalized(result, Normalizer.Form.NFC));
@@ -73,17 +75,24 @@ class Din91379TextServiceTest {
 
     @Test
     void acceptsWhitespaceAndAscii() {
-        assertEquals("a & b <c>\n\t1", service.normalizeAndValidate("a & b <c>\n\t1"));
+        assertEquals("a & b <c>\n\t1", service.normalizeAndValidate("a & b <c>\n\t1", Din91379Type.DATATYPE_C));
     }
 
     @Test
     void rejectsGreekAndCyrillic() {
-        assertThrows(BusinessException.class, () -> service.normalizeAndValidate("Ω"));
-        assertThrows(BusinessException.class, () -> service.normalizeAndValidate("Ж"));
+        assertThrows(BusinessException.class, () -> service.normalizeAndValidate("Ω", Din91379Type.DATATYPE_C));
+        assertThrows(BusinessException.class, () -> service.normalizeAndValidate("Ж", Din91379Type.DATATYPE_C));
     }
 
     @Test
     void rejectsControlCharacters() {
-        assertThrows(BusinessException.class, () -> service.normalizeAndValidate("a\u0001b"));
+        assertThrows(BusinessException.class, () -> service.normalizeAndValidate("a\u0001b", Din91379Type.DATATYPE_C));
+    }
+
+    @Test
+    void chosenTypeDecidesWhichCharactersAreAllowed() {
+        // euro sign is allowed in datatype B (other names) but not in A (names of natural persons)
+        assertEquals("5 €", service.normalizeAndValidate("5 €", Din91379Type.DATATYPE_B));
+        assertThrows(BusinessException.class, () -> service.normalizeAndValidate("5 €", Din91379Type.DATATYPE_A));
     }
 }

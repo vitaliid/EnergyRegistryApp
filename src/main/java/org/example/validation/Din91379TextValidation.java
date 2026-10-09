@@ -1,4 +1,4 @@
-package org.example.service;
+package org.example.validation;
 
 import jakarta.annotation.PostConstruct;
 import org.example.exception.BusinessException;
@@ -18,19 +18,19 @@ import java.text.Normalizer;
 
 /**
  * Normalizes texts to Unicode Normalization Form C and then validates them against
- * DIN 91379 datatype C (din-norm-91379-datatypes.xsd). Normalization always happens first,
+ * the chosen DIN 91379 datatype (din-norm-91379-datatypes.xsd). Normalization always happens first,
  * so that e.g. "e" + U+0301 is accepted as the precomposed "é".
  */
 @Service
-public class Din91379TextService {
+public class Din91379TextValidation {
 
-    private static final String SCHEMA_LOCATION = "xsd/din91379-datatypeC-wrapper.xsd";
+    private static final String SCHEMA_LOCATION = "xsd/din91379-wrapper.xsd";
     private static final String ROOT_NAMESPACE = "urn:example:din91379-validation";
 
     private Schema schema;
 
     @PostConstruct
-    void init() {
+    public void init() {
         try {
             SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             factory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "jar,file");
@@ -42,17 +42,30 @@ public class Din91379TextService {
         }
     }
 
-    /** Returns the NFC form of the text; null stays null. */
-    public String normalize(String text) {
-        return text == null ? null : Normalizer.normalize(text, Normalizer.Form.NFC);
+    /**
+     * Normalizes the text to Unicode Normalization Form C and then validates it against the given
+     * DIN 91379 datatype. The order matters: e.g. "e" + U+0301 is accepted as the precomposed "é".
+     *
+     * @return the normalized text; null stays null
+     * @throws BusinessException INVALID_FIELD_FORMAT if the normalized text contains characters outside the datatype
+     */
+    public String normalizeAndValidate(String text, Din91379Type type) {
+        if (text == null) {
+            return null;
+        }
+
+        String normalized = Normalizer.normalize(text, Normalizer.Form.NFC);
+
+        if (!conformsTo(normalized, type)) {
+            throw new BusinessException(ErrorCode.INVALID_FIELD_FORMAT);
+        }
+
+        return normalized;
     }
 
-    /** True if the text, as is (without normalizing), conforms to datatype C. */
-    public boolean isValid(String text) {
-        if (text == null) {
-            return true;
-        }
-        String xml = "<text xmlns=\"" + ROOT_NAMESPACE + "\">" + escape(text) + "</text>";
+    private boolean conformsTo(String text, Din91379Type type) {
+        String element = type.element();
+        String xml = "<" + element + " xmlns=\"" + ROOT_NAMESPACE + "\">" + escape(text) + "</" + element + ">";
         try {
             schema.newValidator().validate(new StreamSource(new StringReader(xml)));
             return true;
@@ -62,20 +75,6 @@ public class Din91379TextService {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-    }
-
-    /**
-     * Normalizes to NFC, then validates against datatype C.
-     *
-     * @return the normalized text
-     * @throws BusinessException INVALID_FIELD_FORMAT if the normalized text contains characters outside datatype C
-     */
-    public String normalizeAndValidate(String text) {
-        String normalized = normalize(text);
-        if (!isValid(normalized)) {
-            throw new BusinessException(ErrorCode.INVALID_FIELD_FORMAT);
-        }
-        return normalized;
     }
 
     private static String escape(String text) {
